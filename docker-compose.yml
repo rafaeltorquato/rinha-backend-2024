@@ -1,0 +1,112 @@
+services:
+  mysql:
+    image: mysql:8.3.0
+    environment:
+      - 'MYSQL_ROOT_PASSWORD=root'
+      - 'MYSQL_DATABASE=rinha'
+      - 'TZ=America/Sao_Paulo'
+    deploy:
+      resources:
+        limits:
+          cpus: "0.4"
+          memory: "90MB"
+    volumes:
+      - ./sql/ddl.sql:/docker-entrypoint-initdb.d/ddl.sql
+#      - ./sql/ddl2.sql:/docker-entrypoint-initdb.d/ddl2.sql
+      - ./sql/dml.sql:/docker-entrypoint-initdb.d/dml.sql
+      - ./mysql.conf:/etc/mysql/conf.d/config-file.cnf
+    networks:
+      - default
+    healthcheck:
+      test: [ "CMD-SHELL", "mysql -h localhost -uroot -proot" ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  app1:
+    container_name: app1
+    build:
+      dockerfile: Dockerfile
+    environment:
+      - 'DB_CONNECTION_URL=jdbc:mysql://mysql:3306/rinha?allowPublicKeyRetrieval=true&useSSL=false&useServerPrepStmts=false&cachePrepStmts=true&prepStmtCacheSize=500&prepStmtCacheSqlLimit=1024'
+      - 'DB_CONNECTION_USERNAME=root'
+      - 'DB_CONNECTION_PASSWORD=root'
+      - 'JAVA_TOOL_OPTIONS=-XX:+UseG1GC -Xms165m -Xmx165m -XX:ActiveProcessorCount=2 -XX:+UseStringDeduplication'
+      - 'TZ=America/Sao_Paulo'
+      - 'SERVER_PORT=8080'
+    deploy:
+      resources:
+        limits:
+          cpus: "0.45"
+          memory: "195MB"
+    ports:
+      - 8080:8080
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - default
+
+  app2:
+    container_name: app2
+    build:
+      dockerfile: Dockerfile
+    environment:
+      - 'DB_CONNECTION_URL=jdbc:mysql://mysql:3306/rinha?allowPublicKeyRetrieval=true&useSSL=false&useServerPrepStmts=false&cachePrepStmts=true&prepStmtCacheSize=500&prepStmtCacheSqlLimit=1024'
+      - 'DB_CONNECTION_USERNAME=root'
+      - 'DB_CONNECTION_PASSWORD=root'
+      - 'JAVA_TOOL_OPTIONS=-XX:+UseG1GC -Xms165m -Xmx165m -XX:ActiveProcessorCount=2 -XX:+UseStringDeduplication'
+      - 'TZ=America/Sao_Paulo'
+      - 'SERVER_PORT=8081'
+    deploy:
+      resources:
+        limits:
+          cpus: "0.45"
+          memory: "195MB"
+    ports:
+      - 8081:8081
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - default
+
+  nginx:
+    container_name: nginx
+    image: nginx:latest
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    ports:
+      - 9999:9999
+    depends_on:
+      - app1
+      - app2
+    deploy:
+      resources:
+        limits:
+          cpus: "0.2"
+          memory: "80MB"
+    networks:
+      - default
+
+#  envoy:
+#    image: envoyproxy/envoy-alpine:v1.21-latest
+#    environment:
+#      - 'TZ=America/Sao_Paulo'
+#    volumes:
+#      -  ./envoy.yaml:/etc/envoy/envoy.yaml
+#    ports:
+#      - "9999:9999"
+#    networks:
+#      - default
+#    depends_on:
+#      - app
+#    deploy:
+#      resources:
+#        limits:
+#          cpus: "4"
+#          memory: "50MB"
+
+networks:
+  default:
+    driver: bridge
