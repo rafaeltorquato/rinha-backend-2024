@@ -1,4 +1,4 @@
-package br.com.torquato.api;
+package br.com.torquato.api.data;
 
 import java.time.LocalDateTime;
 import java.util.List;

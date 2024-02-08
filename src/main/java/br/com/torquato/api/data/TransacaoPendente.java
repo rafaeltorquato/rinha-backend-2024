@@ -1,4 +1,4 @@
-package br.com.torquato.api;
+package br.com.torquato.api.data;
 
 public record TransacaoPendente(int valor,
                                 TipoTransacao tipo,

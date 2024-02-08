@@ -1,6 +1,8 @@
 quarkus:
+  log:
+    level: FATAL
   http:
-    port: 9999
+    port: 8080
   datasource:
     db-kind: mysql
     username: root

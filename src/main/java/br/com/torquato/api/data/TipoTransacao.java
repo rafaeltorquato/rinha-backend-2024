@@ -1,4 +1,4 @@
-package br.com.torquato.api;
+package br.com.torquato.api.data;
 
 public enum TipoTransacao {
     c,

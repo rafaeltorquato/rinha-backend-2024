@@ -1,4 +1,4 @@
-package br.com.torquato.error;
+package br.com.torquato.api.error;
 
 import jakarta.annotation.Priority;
 import jakarta.ws.rs.container.ContainerRequestContext;
@@ -14,7 +14,7 @@ public class ErrorPageResponseFilter implements ContainerResponseFilter {
     @Override
     public void filter(ContainerRequestContext requestContext, ContainerResponseContext responseContext) {
         int status = responseContext.getStatus();
-        if (status >= Response.Status.BAD_REQUEST.getStatusCode()) {
+        if (status ==  Response.Status.BAD_REQUEST.getStatusCode()) {
             responseContext.setStatus(422);
         }
     }

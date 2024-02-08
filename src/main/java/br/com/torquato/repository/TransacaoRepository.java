@@ -1,9 +1,10 @@
-package br.com.torquato;
+package br.com.torquato.repository;
 
-import br.com.torquato.api.Extrato;
-import br.com.torquato.api.Saldo;
-import br.com.torquato.api.TipoTransacao;
-import br.com.torquato.api.TransacaoPendente;
+import br.com.torquato.JdbcUtil;
+import br.com.torquato.api.data.Extrato;
+import br.com.torquato.api.data.Saldo;
+import br.com.torquato.api.data.TipoTransacao;
+import br.com.torquato.api.data.TransacaoPendente;
 import io.vertx.ext.web.handler.HttpException;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
@@ -11,11 +12,8 @@ import jakarta.inject.Singleton;
 import javax.sql.DataSource;
 import java.sql.*;
 import java.time.LocalDateTime;
-import java.time.ZonedDateTime;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.List;
-import java.util.Optional;
 
 @Singleton
 public class TransacaoRepository {
@@ -63,7 +61,7 @@ public class TransacaoRepository {
                 final int valor = resultSet.getInt("valor");
                 final String descricao = resultSet.getString("descricao");
                 final Extrato.Transacao transacao = new Extrato.Transacao(
-                        valor,
+                        Math.abs(valor),
                         valor > 0 ? TipoTransacao.c : TipoTransacao.d,
                         descricao,
                         dataHora
@@ -75,8 +73,8 @@ public class TransacaoRepository {
         } catch (SQLException e) {
             throw new RuntimeException(e);
         } finally {
-            safeClose(preparedStatement);
-            safeClose(connection);
+            JdbcUtil.safeClose(preparedStatement);
+            JdbcUtil.safeClose(connection);
         }
     }
 
@@ -107,29 +105,11 @@ public class TransacaoRepository {
             }
             throw new RuntimeException(e);
         } finally {
-            safeClose(stmt);
-            safeClose(connection);
+            JdbcUtil.safeClose(stmt);
+            JdbcUtil.safeClose(connection);
         }
         return saldo;
     }
 
-    private void safeClose(Connection conn) {
-        if (conn != null) {
-            try {
-                conn.close();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-        }
-    }
 
-    private void safeClose(PreparedStatement stmt) {
-        if (stmt != null) {
-            try {
-                stmt.close();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-        }
-    }
 }

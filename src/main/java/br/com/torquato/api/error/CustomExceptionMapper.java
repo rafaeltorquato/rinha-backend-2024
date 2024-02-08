@@ -1,4 +1,4 @@
-package br.com.torquato.error;
+package br.com.torquato.api.error;
 
 import io.vertx.ext.web.handler.HttpException;
 import jakarta.ws.rs.Produces;
@@ -11,10 +11,13 @@ import lombok.extern.slf4j.Slf4j;
 public class CustomExceptionMapper implements ExceptionMapper<Throwable> {
     @Override
     public Response toResponse(Throwable throwable) {
-        log.error(throwable.getMessage(), throwable);
         return switch (throwable) {
-            case HttpException httpException -> Response.status(422).entity(httpException.getMessage()).build();
-            default -> Response.serverError().build();
+            case HttpException httpException -> Response.status(422).build();
+            default -> {
+                throwable.printStackTrace();
+                log.error(throwable.getMessage(), throwable);
+                yield Response.serverError().build();
+            }
         };
     }
 }
