@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 
 @Slf4j
@@ -25,6 +26,16 @@ public class JdbcUtil {
         if (stmt != null) {
             try {
                 stmt.close();
+            } catch (SQLException e) {
+                log.error(e.getMessage(), e);
+            }
+        }
+    }
+
+    public static void safeClose(ResultSet resultSet) {
+        if (resultSet != null) {
+            try {
+                resultSet.close();
             } catch (SQLException e) {
                 log.error(e.getMessage(), e);
             }

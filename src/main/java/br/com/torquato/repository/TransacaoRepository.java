@@ -8,6 +8,7 @@ import br.com.torquato.api.data.TransacaoPendente;
 import io.vertx.ext.web.handler.HttpException;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
+import lombok.extern.slf4j.Slf4j;
 
 import javax.sql.DataSource;
 import java.sql.*;
@@ -15,6 +16,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+@Slf4j
 @Singleton
 public class TransacaoRepository {
 
@@ -30,8 +32,7 @@ public class TransacaoRepository {
             from rinha.cliente c
                 left join rinha.transacao t on c.id = t.id_cliente
             where
-                c.id = ? and
-                (t.realizada_em <= ? or t.realizada_em is null)
+                c.id = ? and (t.realizada_em is null or t.realizada_em <= ?)
             order by t.realizada_em desc limit 10
             """;
 
@@ -40,13 +41,14 @@ public class TransacaoRepository {
 
         Connection connection = null;
         PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
         try {
             connection = dataSource.getConnection();
             preparedStatement = connection.prepareStatement(SQL_EXTRATO);
             preparedStatement.setInt(1, idCliente);
 
             preparedStatement.setTimestamp(2, Timestamp.valueOf(dataHora));
-            ResultSet resultSet = preparedStatement.executeQuery();
+            resultSet = preparedStatement.executeQuery();
             Extrato.Saldo saldo = null;
             final List<Extrato.Transacao> transacoes = new ArrayList<>(resultSet.getFetchSize());
             while (resultSet.next()) {
@@ -73,6 +75,7 @@ public class TransacaoRepository {
         } catch (SQLException e) {
             throw new RuntimeException(e);
         } finally {
+            JdbcUtil.safeClose(resultSet);
             JdbcUtil.safeClose(preparedStatement);
             JdbcUtil.safeClose(connection);
         }
@@ -87,7 +90,7 @@ public class TransacaoRepository {
 
         Connection connection = null;
         CallableStatement stmt = null;
-        Saldo saldo;
+        Saldo saldo = null;
         try {
             connection = dataSource.getConnection();
             stmt = connection.prepareCall("{call rinha.processa_transacao(?,?,?,?,?)}");
@@ -98,12 +101,13 @@ public class TransacaoRepository {
             stmt.registerOutParameter(4, Types.INTEGER); //limite
             stmt.registerOutParameter(5, Types.INTEGER); //saldo
             stmt.execute();
-            saldo = new Saldo(stmt.getInt(4), stmt.getInt(5));
-        } catch (Exception e) {
-            if (e.getMessage().contains("invalido")) {
-                throw new HttpException(422);
+            final int limite = stmt.getInt(4);
+            if(limite != 0 || !stmt.wasNull()) {
+                saldo = new Saldo(limite, stmt.getInt(5));
             }
-            throw new RuntimeException(e);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            return null;
         } finally {
             JdbcUtil.safeClose(stmt);
             JdbcUtil.safeClose(connection);

@@ -5,17 +5,20 @@ import br.com.torquato.api.data.Saldo;
 import br.com.torquato.api.data.TransacaoPendente;
 import br.com.torquato.repository.TransacaoRepository;
 import io.smallrye.common.annotation.RunOnVirtualThread;
-import io.vertx.ext.web.handler.HttpException;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.Response;
+import org.jboss.resteasy.reactive.RestResponse;
 
 import java.util.Set;
 
 @Path("/clientes")
 public class ClientesResource {
 
+    public static final RestResponse<Saldo> STATUS_422_SALDO = RestResponse.status(422);
+    public static final RestResponse<Saldo> STATUS_404_SALDO = RestResponse.status(RestResponse.Status.NOT_FOUND.getStatusCode());
+
+    public static final RestResponse<Extrato> STATUS_404_EXTRATO = RestResponse.status(RestResponse.Status.NOT_FOUND.getStatusCode());
     @Inject
     TransacaoRepository transacaoRepository;
     @Inject
@@ -25,24 +28,28 @@ public class ClientesResource {
     @Path(("/{id}/extrato"))
     @Produces(MediaType.APPLICATION_JSON)
     @RunOnVirtualThread
-    public Extrato extratoPorCliente(@PathParam("id") final int id) {
+    public RestResponse<Extrato> extratoPorCliente(@PathParam("id") final int id) {
         if (!this.cacheClientes.contains(id)) {
-            throw new HttpException(Response.Status.NOT_FOUND.getStatusCode());
+            return STATUS_404_EXTRATO;
         }
-        return transacaoRepository.extratoPorCliente(id);
+        return RestResponse.ok(transacaoRepository.extratoPorCliente(id));
     }
 
     @POST
     @Path(("/{id}/transacoes"))
     @Produces(MediaType.APPLICATION_JSON)
     @RunOnVirtualThread
-    public Saldo processar(@PathParam("id") final int id, final TransacaoPendente transacaoPendente) {
+    public RestResponse<Saldo> processar(@PathParam("id") final int id, final TransacaoPendente transacaoPendente) {
         if (!this.cacheClientes.contains(id)) {
-            throw new HttpException(Response.Status.NOT_FOUND.getStatusCode());
+            return STATUS_404_SALDO;
         }
         if (!transacaoPendente.isValida()) {
-            throw new HttpException(422);
+            return STATUS_422_SALDO;
         }
-        return this.transacaoRepository.salvarTransacao(id, transacaoPendente);
+        final Saldo saldo = this.transacaoRepository.salvarTransacao(id, transacaoPendente);
+        if(saldo == null) {
+            return STATUS_422_SALDO;
+        }
+        return RestResponse.ok(saldo);
     }
 }

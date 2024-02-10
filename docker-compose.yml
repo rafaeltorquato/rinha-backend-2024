@@ -9,12 +9,10 @@ services:
     deploy:
       resources:
         limits:
-          cpus: "0.6"
+          cpus: "0.75"
           memory: "350MB"
     volumes:
-      - ./sql/ddl.sql:/docker-entrypoint-initdb.d/ddl.sql
-      - ./sql/ddl2.sql:/docker-entrypoint-initdb.d/ddl2.sql
-      - ./sql/dml.sql:/docker-entrypoint-initdb.d/dml.sql
+      - ./sql/init-script.sql:/docker-entrypoint-initdb.d/init-script.sql
       - ./mysql.conf:/etc/mysql/conf.d/config-file.cnf
     networks:
       - default
@@ -28,16 +26,18 @@ services:
     container_name: app1
     image: quarkus/rinha-backend-2024
     environment:
+      - 'QUARKUS_LOG_LEVEL=WARN'
       - 'QUARKUS_DATASOURCE_JDBC_INITIAL_SIZE=5'
       - 'QUARKUS_DATASOURCE_JDBC_MIN_SIZE=5'
       - 'QUARKUS_DATASOURCE_JDBC_MAX_SIZE=5'
       - 'QUARKUS_DATASOURCE_JDBC_TRANSACTIONS=disabled'
       - 'QUARKUS_DATASOURCE_JDBC_DETECT_STATEMENT_LEAKS=false'
-      - 'QUARKUS_DATASOURCE_JDBC_ACQUISITION_TIMEOUT=1S'
+      - 'QUARKUS_DATASOURCE_JDBC_ACQUISITION_TIMEOUT=2S'
       - 'QUARKUS_DATASOURCE_JDBC_URL=jdbc:mysql://mysql:3306/rinha?useServerPrepStmts=true&prepStmtCacheSize=500&prepStmtCacheSqlLimit=1024'
       - 'QUARKUS_DATASOURCE_USERNAME=root'
       - 'QUARKUS_DATASOURCE_PASSWORD=root'
       - 'TZ=America/Sao_Paulo'
+      - 'JAVA_TOOL_OPTIONS=-XX:ActiveProcessorCount=2'
       - 'QUARKUS_HTTP_PORT=8080'
     deploy:
       resources:
@@ -56,16 +56,18 @@ services:
     container_name: app2
     image: quarkus/rinha-backend-2024
     environment:
+      - 'QUARKUS_LOG_LEVEL=WARN'
       - 'QUARKUS_DATASOURCE_JDBC_INITIAL_SIZE=5'
       - 'QUARKUS_DATASOURCE_JDBC_MIN_SIZE=5'
       - 'QUARKUS_DATASOURCE_JDBC_MAX_SIZE=5'
       - 'QUARKUS_DATASOURCE_JDBC_TRANSACTIONS=disabled'
       - 'QUARKUS_DATASOURCE_JDBC_DETECT_STATEMENT_LEAKS=false'
-      - 'QUARKUS_DATASOURCE_JDBC_ACQUISITION_TIMEOUT=1S'
+      - 'QUARKUS_DATASOURCE_JDBC_ACQUISITION_TIMEOUT=2S'
       - 'QUARKUS_DATASOURCE_JDBC_URL=jdbc:mysql://mysql:3306/rinha?useServerPrepStmts=true&prepStmtCacheSize=500&prepStmtCacheSqlLimit=1024'
       - 'QUARKUS_DATASOURCE_USERNAME=root'
       - 'QUARKUS_DATASOURCE_PASSWORD=root'
       - 'TZ=America/Sao_Paulo'
+      - 'JAVA_TOOL_OPTIONS=-XX:ActiveProcessorCount=2'
       - 'QUARKUS_HTTP_PORT=8081'
     deploy:
       resources:
@@ -115,7 +117,7 @@ services:
     deploy:
       resources:
         limits:
-          cpus: "0.3"
+          cpus: "0.15"
           memory: "100MB"
 
 networks:

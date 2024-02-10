@@ -1,6 +1,6 @@
 quarkus:
   log:
-    level: FATAL
+    level: WARN
   http:
     port: 8080
   datasource:
@@ -10,3 +10,4 @@ quarkus:
     jdbc:
       url: "jdbc:mysql://localhost:3306/rinha"
       max-size: 10
+      transactions: disabled
