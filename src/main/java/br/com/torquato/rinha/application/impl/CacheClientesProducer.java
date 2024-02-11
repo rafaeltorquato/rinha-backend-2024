@@ -1,4 +1,4 @@
-package br.com.torquato;
+package br.com.torquato.rinha.application.impl;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Produces;

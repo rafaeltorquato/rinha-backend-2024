@@ -1,4 +1,4 @@
-package br.com.torquato.api.error;
+package br.com.torquato.rinha.delivery.rest.error;
 
 import io.vertx.ext.web.handler.HttpException;
 import jakarta.ws.rs.Produces;

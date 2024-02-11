@@ -1,4 +1,4 @@
-package br.com.torquato.api.data;
+package br.com.torquato.rinha.domain.model;
 
 import java.util.Set;
 

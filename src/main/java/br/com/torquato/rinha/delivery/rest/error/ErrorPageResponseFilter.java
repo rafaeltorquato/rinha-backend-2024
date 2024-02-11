@@ -1,4 +1,4 @@
-package br.com.torquato.api.error;
+package br.com.torquato.rinha.delivery.rest.error;
 
 import jakarta.annotation.Priority;
 import jakarta.ws.rs.container.ContainerRequestContext;

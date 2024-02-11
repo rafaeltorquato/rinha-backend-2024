@@ -1,9 +1,9 @@
-package br.com.torquato.api.data;
+package br.com.torquato.rinha.domain.model;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
-public record Extrato(Saldo saldo, List<Transacao> ultimas_transacoes) {
+public record ExtratoCliente(Saldo saldo, List<Transacao> ultimas_transacoes) {
 
     public record Saldo(int limite,
                         int total,

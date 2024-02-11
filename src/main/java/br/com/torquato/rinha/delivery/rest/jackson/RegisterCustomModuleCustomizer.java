@@ -1,4 +1,4 @@
-package br.com.torquato.jackson;
+package br.com.torquato.rinha.delivery.rest.jackson;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
