@@ -25,21 +25,6 @@ create index idx_id_cliente
     on rinha.transacao (id_cliente);
 
 
-# Cache
-SET GLOBAL c_index_cache.key_buffer_size = (SELECT index_length MYISize
-                                            FROM information_schema.tables
-                                            WHERE table_schema = 'rinha'
-                                              AND table_name = 'cliente') * 1024;
-CACHE INDEX rinha.cliente IN c_index_cache;
-
-
-SET GLOBAL t_index_cache.key_buffer_size = (SELECT index_length MYISize
-                                            FROM information_schema.tables
-                                            WHERE table_schema = 'rinha'
-                                              AND table_name = 'transacao') * 1024;
-CACHE INDEX rinha.transacao IN t_index_cache;
-
-
 drop procedure if exists rinha.processa_transacao;
 DELIMITER |
 create procedure rinha.processa_transacao(
@@ -101,3 +86,12 @@ values (1, 100000, 0),
        (3, 1000000, 0),
        (4, 10000000, 0),
        (5, 500000, 0);
+
+
+# Cache
+SET GLOBAL c_index_cache.key_buffer_size = (SELECT index_length MYISize
+                                            FROM information_schema.tables
+                                            WHERE table_schema = 'rinha'
+                                              AND table_name = 'cliente') * 1024 * 1024;
+CACHE INDEX rinha.cliente IN c_index_cache;
+LOAD INDEX INTO CACHE rinha.cliente;
