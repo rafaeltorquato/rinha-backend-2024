@@ -6,31 +6,37 @@ create table rinha.cliente
     id     smallint primary key,
     limite int not null,
     saldo  int not null
-) ENGINE = MyISAM, ROW_FORMAT = Fixed;
+) ENGINE = MyISAM;
 
 create table rinha.transacao
 (
-    id           serial primary key,
     id_cliente   smallint    not null,
     valor        int         not null,
     tipo         char        not null,
     descricao    varchar(10) not null,
     realizada_em datetime(6) not null default now(6)
-) ENGINE = MyISAM, ROW_FORMAT = Fixed;
+) ENGINE = MyISAM,
+  ROW_FORMAT = Fixed;
 
-create index idx_transacao_realizada_em
+create index idx_realizada_em
     on rinha.transacao (realizada_em);
+
+create index idx_id_cliente
+    on rinha.transacao (id_cliente);
 
 
 # Cache
-# SELECT index_length MYISize FROM information_schema.tables
-# WHERE table_schema='rinha' AND table_name='cliente';
-SET GLOBAL c_index_cache.key_buffer_size = 2048 * 1024;
+SET GLOBAL c_index_cache.key_buffer_size = (SELECT index_length MYISize
+                                            FROM information_schema.tables
+                                            WHERE table_schema = 'rinha'
+                                              AND table_name = 'cliente') * 1024;
 CACHE INDEX rinha.cliente IN c_index_cache;
 
-# SELECT index_length MYISize FROM information_schema.tables
-# WHERE table_schema='rinha' AND table_name='transacao';
-SET GLOBAL t_index_cache.key_buffer_size = 2578432 * 1024;
+
+SET GLOBAL t_index_cache.key_buffer_size = (SELECT index_length MYISize
+                                            FROM information_schema.tables
+                                            WHERE table_schema = 'rinha'
+                                              AND table_name = 'transacao') * 1024;
 CACHE INDEX rinha.transacao IN t_index_cache;
 
 
