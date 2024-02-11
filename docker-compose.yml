@@ -9,10 +9,10 @@ services:
     deploy:
       resources:
         limits:
-          cpus: "0.65"
+          cpus: "0.75"
           memory: "370MB"
     volumes:
-      - ./sql/init-script.sql:/docker-entrypoint-initdb.d/init-script.sql
+      - ./sql/mysql-init-script.sql:/docker-entrypoint-initdb.d/mysql-init-script.sql
       - ./mysql.conf:/etc/mysql/conf.d/config-file.cnf
     networks:
       - default
@@ -21,15 +21,17 @@ services:
       interval: 5s
       timeout: 5s
       retries: 10
+#    ports:
+#      - 3306:3306
 
   app1:
     container_name: app1
     image: quarkus/rinha-backend-2024
     environment:
       - 'QUARKUS_LOG_LEVEL=WARN'
-      - 'QUARKUS_DATASOURCE_JDBC_INITIAL_SIZE=4'
-      - 'QUARKUS_DATASOURCE_JDBC_MIN_SIZE=4'
-      - 'QUARKUS_DATASOURCE_JDBC_MAX_SIZE=4'
+      - 'QUARKUS_DATASOURCE_JDBC_INITIAL_SIZE=5'
+      - 'QUARKUS_DATASOURCE_JDBC_MIN_SIZE=5'
+      - 'QUARKUS_DATASOURCE_JDBC_MAX_SIZE=5'
       - 'QUARKUS_DATASOURCE_JDBC_DETECT_STATEMENT_LEAKS=false'
       - 'QUARKUS_DATASOURCE_JDBC_ACQUISITION_TIMEOUT=10S'
       - 'QUARKUS_DATASOURCE_JDBC_URL=jdbc:mysql://mysql:3306/rinha?useServerPrepStmts=true&prepStmtCacheSize=500&prepStmtCacheSqlLimit=1024'
@@ -41,7 +43,7 @@ services:
     deploy:
       resources:
         limits:
-          cpus: "0.35"
+          cpus: "0.3"
           memory: "50MB"
     ports:
       - 8080:8080
@@ -56,9 +58,9 @@ services:
     image: quarkus/rinha-backend-2024
     environment:
       - 'QUARKUS_LOG_LEVEL=WARN'
-      - 'QUARKUS_DATASOURCE_JDBC_INITIAL_SIZE=4'
-      - 'QUARKUS_DATASOURCE_JDBC_MIN_SIZE=4'
-      - 'QUARKUS_DATASOURCE_JDBC_MAX_SIZE=4'
+      - 'QUARKUS_DATASOURCE_JDBC_INITIAL_SIZE=5'
+      - 'QUARKUS_DATASOURCE_JDBC_MIN_SIZE=5'
+      - 'QUARKUS_DATASOURCE_JDBC_MAX_SIZE=5'
       - 'QUARKUS_DATASOURCE_JDBC_DETECT_STATEMENT_LEAKS=false'
       - 'QUARKUS_DATASOURCE_JDBC_ACQUISITION_TIMEOUT=10S'
       - 'QUARKUS_DATASOURCE_JDBC_URL=jdbc:mysql://mysql:3306/rinha?useServerPrepStmts=true&prepStmtCacheSize=500&prepStmtCacheSqlLimit=1024'
@@ -70,7 +72,7 @@ services:
     deploy:
       resources:
         limits:
-          cpus: "0.35"
+          cpus: "0.3"
           memory: "50MB"
     ports:
       - 8081:8081

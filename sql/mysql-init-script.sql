@@ -22,6 +22,17 @@ create index idx_transacao_realizada_em
     on rinha.transacao (realizada_em);
 
 
+# Cache
+# SELECT index_length MYISize FROM information_schema.tables
+# WHERE table_schema='rinha' AND table_name='cliente';
+SET GLOBAL c_index_cache.key_buffer_size = 2048 * 1024;
+CACHE INDEX rinha.cliente IN c_index_cache;
+
+# SELECT index_length MYISize FROM information_schema.tables
+# WHERE table_schema='rinha' AND table_name='transacao';
+SET GLOBAL t_index_cache.key_buffer_size = 2578432 * 1024;
+CACHE INDEX rinha.transacao IN t_index_cache;
+
 
 drop procedure if exists rinha.processa_transacao;
 DELIMITER |
