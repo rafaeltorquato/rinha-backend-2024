@@ -5,12 +5,16 @@ import br.com.torquato.rinha.application.ProcessadorTransacoes;
 import br.com.torquato.rinha.domain.model.ExtratoCliente;
 import br.com.torquato.rinha.domain.model.SaldoPosTransacao;
 import br.com.torquato.rinha.domain.model.TransacaoPendente;
+import io.quarkus.runtime.Startup;
 import io.smallrye.common.annotation.RunOnVirtualThread;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
+import lombok.extern.slf4j.Slf4j;
 import org.jboss.resteasy.reactive.RestResponse;
 
+@Slf4j
+@Startup
 @Path("/clientes")
 public class ClientesRestResource {
 

@@ -2,8 +2,12 @@ package br.com.torquato.rinha.application.impl;
 
 import br.com.torquato.rinha.application.ExecutorBuscaExtrato;
 import br.com.torquato.rinha.domain.model.ExtratoCliente;
+import io.quarkus.runtime.Startup;
+import io.quarkus.runtime.StartupEvent;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.event.Observes;
 import jakarta.inject.Inject;
+import lombok.extern.slf4j.Slf4j;
 
 import javax.sql.DataSource;
 import java.sql.CallableStatement;
@@ -14,6 +18,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
+@Slf4j
+@Startup
 @ApplicationScoped
 public class ExecutorBuscaExtratoJDBC implements ExecutorBuscaExtrato {
 
@@ -76,5 +82,10 @@ public class ExecutorBuscaExtratoJDBC implements ExecutorBuscaExtrato {
             ));
         }
         return transacoes;
+    }
+
+    void onStart(@Observes StartupEvent evt) {
+        this.buscar(this.cacheClientes.stream().findFirst().get());
+        log.warn("Extrato warn up!");
     }
 }

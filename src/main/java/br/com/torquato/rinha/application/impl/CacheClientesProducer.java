@@ -1,5 +1,6 @@
 package br.com.torquato.rinha.application.impl;
 
+import io.quarkus.runtime.Startup;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Produces;
 import jakarta.inject.Inject;
@@ -9,6 +10,7 @@ import java.sql.SQLException;
 import java.util.HashSet;
 import java.util.Set;
 
+@Startup
 @ApplicationScoped
 public class CacheClientesProducer {
 
@@ -16,6 +18,7 @@ public class CacheClientesProducer {
     DataSource dataSource;
 
     @Produces
+    @ApplicationScoped
     public Set<Integer> clientesCache() {
         try (final var connection = dataSource.getConnection();
              final var preparedStatement = connection.prepareStatement("select id from rinha.cliente");
