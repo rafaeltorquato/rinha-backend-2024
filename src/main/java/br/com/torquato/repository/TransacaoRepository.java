@@ -1,108 +1,75 @@
 package br.com.torquato.repository;
 
-import br.com.torquato.JdbcUtil;
 import br.com.torquato.api.data.Extrato;
-import br.com.torquato.api.data.TipoTransacao;
+import br.com.torquato.api.data.Saldo;
 import br.com.torquato.api.data.TransacaoPendente;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.sql.DataSource;
-import java.sql.*;
-import java.time.LocalDateTime;
+import java.sql.ResultSet;
+import java.sql.Types;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 @Slf4j
 @Singleton
 public class TransacaoRepository {
-
     @Inject
     DataSource dataSource;
-    private static final String SQL_EXTRATO = """
-            select
-                c.saldo,
-                c.limite,
-                t.valor,
-                t.descricao,
-                t.realizada_em
-            from rinha.cliente c
-                left join rinha.transacao t on c.id = t.id_cliente
-            where
-                c.id = ? and (t.realizada_em is null or t.realizada_em <= ?)
-            order by t.realizada_em desc limit 10
-            """;
 
     public Extrato extratoPorCliente(final int idCliente) {
-        final LocalDateTime dataHora = LocalDateTime.now();
-
-        Connection connection = null;
-        PreparedStatement preparedStatement = null;
-        ResultSet resultSet = null;
-        try {
-            connection = dataSource.getConnection();
-            preparedStatement = connection.prepareStatement(SQL_EXTRATO);
-            preparedStatement.setInt(1, idCliente);
-
-            preparedStatement.setTimestamp(2, Timestamp.valueOf(dataHora));
-            resultSet = preparedStatement.executeQuery();
-            Extrato.Saldo saldo = null;
-            final List<Extrato.Transacao> transacoes = new ArrayList<>(resultSet.getFetchSize());
-            while (resultSet.next()) {
-                final int valorSaldo = resultSet.getInt("saldo");
-                final int valorLimite = resultSet.getInt("limite");
-                if (saldo == null) {
-                    saldo = new Extrato.Saldo(valorLimite, valorSaldo, dataHora);
+        try (final var connection = dataSource.getConnection();
+             final var stmt = connection.prepareCall("{call rinha.retorna_extrato(?)}")) {
+            stmt.setInt(1, idCliente);
+            stmt.execute();
+            final ResultSet rsSaldo = stmt.getResultSet();
+            rsSaldo.next();
+            Extrato.Saldo saldo = new Extrato.Saldo(
+                    rsSaldo.getInt("limite"),
+                    rsSaldo.getInt("saldo"),
+                    rsSaldo.getTimestamp("data_extrato").toLocalDateTime()
+            );
+            List<Extrato.Transacao> transacoes = Collections.emptyList();
+            if (stmt.getMoreResults()) {
+                ResultSet resultTransacoes = stmt.getResultSet();
+                transacoes = new ArrayList<>(resultTransacoes.getFetchSize());
+                while (resultTransacoes.next()) {
+                    transacoes.add(new Extrato.Transacao(
+                            resultTransacoes.getInt("valor"),
+                            resultTransacoes.getString("tipo"),
+                            resultTransacoes.getString("descricao"),
+                            resultTransacoes.getTimestamp("realizada_em").toLocalDateTime()
+                    ));
                 }
-                final Timestamp realizadaEm = resultSet.getTimestamp("realizada_em");
-                if (realizadaEm == null) break;
-
-                final int valor = resultSet.getInt("valor");
-                final String descricao = resultSet.getString("descricao");
-                final Extrato.Transacao transacao = new Extrato.Transacao(
-                        Math.abs(valor),
-                        valor > 0 ? TipoTransacao.c : TipoTransacao.d,
-                        descricao,
-                        dataHora
-                );
-                transacoes.add(transacao);
 
             }
             return new Extrato(saldo, transacoes);
-        } catch (SQLException e) {
+        } catch (Exception e) {
             throw new RuntimeException(e);
-        } finally {
-            JdbcUtil.safeClose(resultSet);
-            JdbcUtil.safeClose(preparedStatement);
-            JdbcUtil.safeClose(connection);
         }
     }
 
-    public String salvarTransacao(int idCliente, TransacaoPendente transacaoPendente) {
-
-        Connection connection = null;
-        CallableStatement stmt = null;
-        String saldo;
-        try {
-            connection = dataSource.getConnection();
-            stmt = connection.prepareCall("{call rinha.processa_transacao(?,?,?,?,?)}");
-
+    public Saldo salvarTransacao(int idCliente, TransacaoPendente transacaoPendente) {
+        try (final var connection = dataSource.getConnection();
+             final var stmt = connection.prepareCall("{call rinha.processa_transacao(?,?,?,?,?,?)}");) {
             stmt.setInt(1, idCliente);
             stmt.setInt(2, transacaoPendente.valor());
             stmt.setString(3, transacaoPendente.descricao());
-            stmt.setString(4, transacaoPendente.tipo().name());
-            stmt.registerOutParameter(5, Types.INTEGER); //saldo
+            stmt.setString(4, transacaoPendente.tipo());
+            stmt.registerOutParameter(5, Types.VARCHAR); //saldo
+            stmt.registerOutParameter(6, Types.VARCHAR); //limite
             stmt.execute();
-            saldo = stmt.getString(5);
+            int limite = stmt.getInt(5);
+            if (limite != 0 || !stmt.wasNull()) {
+                return new Saldo(limite, stmt.getInt(6));
+            }
         } catch (Exception e) {
             log.error(e.getMessage(), e);
-            return null;
-        } finally {
-            JdbcUtil.safeClose(stmt);
-            JdbcUtil.safeClose(connection);
         }
-        return saldo;
+        return null;
     }
 
 

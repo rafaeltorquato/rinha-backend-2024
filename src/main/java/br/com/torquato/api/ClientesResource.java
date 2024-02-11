@@ -1,6 +1,7 @@
 package br.com.torquato.api;
 
 import br.com.torquato.api.data.Extrato;
+import br.com.torquato.api.data.Saldo;
 import br.com.torquato.api.data.TransacaoPendente;
 import br.com.torquato.repository.TransacaoRepository;
 import io.smallrye.common.annotation.RunOnVirtualThread;
@@ -14,8 +15,8 @@ import java.util.Set;
 @Path("/clientes")
 public class ClientesResource {
 
-    public static final RestResponse<String> STATUS_422_SALDO = RestResponse.status(422);
-    public static final RestResponse<String> STATUS_404_SALDO = RestResponse.status(RestResponse.Status.NOT_FOUND.getStatusCode());
+    public static final RestResponse<Saldo> STATUS_422_SALDO = RestResponse.status(422);
+    public static final RestResponse<Saldo> STATUS_404_SALDO = RestResponse.status(RestResponse.Status.NOT_FOUND.getStatusCode());
 
     public static final RestResponse<Extrato> STATUS_404_EXTRATO = RestResponse.status(RestResponse.Status.NOT_FOUND.getStatusCode());
     @Inject
@@ -38,15 +39,15 @@ public class ClientesResource {
     @Path(("/{id}/transacoes"))
     @Produces(MediaType.APPLICATION_JSON)
     @RunOnVirtualThread
-    public RestResponse<String> processar(@PathParam("id") final int id, final TransacaoPendente transacaoPendente) {
+    public RestResponse<Saldo> processar(@PathParam("id") final int id, final TransacaoPendente transacaoPendente) {
         if (!this.cacheClientes.contains(id)) {
             return STATUS_404_SALDO;
         }
         if (!transacaoPendente.isValida()) {
             return STATUS_422_SALDO;
         }
-        final String saldo = this.transacaoRepository.salvarTransacao(id, transacaoPendente);
-        if(saldo == null) {
+        final Saldo saldo = this.transacaoRepository.salvarTransacao(id, transacaoPendente);
+        if (saldo == null) {
             return STATUS_422_SALDO;
         }
         return RestResponse.ok(saldo);

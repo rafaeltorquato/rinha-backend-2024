@@ -12,7 +12,7 @@ public record Extrato(Saldo saldo, List<Transacao> ultimas_transacoes) {
 
     public record Transacao(
             int valor,
-            TipoTransacao tipo,
+            String tipo,
             String descricao,
             LocalDateTime realizada_em) {
     }

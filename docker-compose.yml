@@ -9,8 +9,8 @@ services:
     deploy:
       resources:
         limits:
-          cpus: "0.75"
-          memory: "350MB"
+          cpus: "0.65"
+          memory: "370MB"
     volumes:
       - ./sql/init-script.sql:/docker-entrypoint-initdb.d/init-script.sql
       - ./mysql.conf:/etc/mysql/conf.d/config-file.cnf
@@ -30,7 +30,6 @@ services:
       - 'QUARKUS_DATASOURCE_JDBC_INITIAL_SIZE=5'
       - 'QUARKUS_DATASOURCE_JDBC_MIN_SIZE=5'
       - 'QUARKUS_DATASOURCE_JDBC_MAX_SIZE=5'
-      - 'QUARKUS_DATASOURCE_JDBC_TRANSACTIONS=disabled'
       - 'QUARKUS_DATASOURCE_JDBC_DETECT_STATEMENT_LEAKS=false'
       - 'QUARKUS_DATASOURCE_JDBC_ACQUISITION_TIMEOUT=10S'
       - 'QUARKUS_DATASOURCE_JDBC_URL=jdbc:mysql://mysql:3306/rinha?useServerPrepStmts=true&prepStmtCacheSize=500&prepStmtCacheSqlLimit=1024'
@@ -42,7 +41,7 @@ services:
     deploy:
       resources:
         limits:
-          cpus: "0.3"
+          cpus: "0.35"
           memory: "50MB"
     ports:
       - 8080:8080
@@ -60,7 +59,6 @@ services:
       - 'QUARKUS_DATASOURCE_JDBC_INITIAL_SIZE=5'
       - 'QUARKUS_DATASOURCE_JDBC_MIN_SIZE=5'
       - 'QUARKUS_DATASOURCE_JDBC_MAX_SIZE=5'
-      - 'QUARKUS_DATASOURCE_JDBC_TRANSACTIONS=disabled'
       - 'QUARKUS_DATASOURCE_JDBC_DETECT_STATEMENT_LEAKS=false'
       - 'QUARKUS_DATASOURCE_JDBC_ACQUISITION_TIMEOUT=10S'
       - 'QUARKUS_DATASOURCE_JDBC_URL=jdbc:mysql://mysql:3306/rinha?useServerPrepStmts=true&prepStmtCacheSize=500&prepStmtCacheSqlLimit=1024'
@@ -72,7 +70,7 @@ services:
     deploy:
       resources:
         limits:
-          cpus: "0.3"
+          cpus: "0.35"
           memory: "50MB"
     ports:
       - 8081:8081
@@ -118,7 +116,7 @@ services:
       resources:
         limits:
           cpus: "0.15"
-          memory: "100MB"
+          memory: "80MB"
 
 networks:
   default:
