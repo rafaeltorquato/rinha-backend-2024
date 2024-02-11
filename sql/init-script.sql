@@ -1,12 +1,12 @@
 drop database if exists rinha;
 create database if not exists rinha;
-
+# TODO SELECT * FROM tblname PROCEDURE ANALYSE();
 create table rinha.cliente
 (
     id     smallint primary key,
     limite int not null,
     saldo  int not null
-) ENGINE = INNODB;
+) ENGINE = MyISAM, ROW_FORMAT = Fixed;
 
 create table rinha.transacao
 (
@@ -16,10 +16,10 @@ create table rinha.transacao
     tipo         char        not null,
     descricao    varchar(10) not null,
     realizada_em datetime(6) not null default now(6)
-) ENGINE = INNODB;
+) ENGINE = MyISAM, ROW_FORMAT = Fixed;
 
 create index idx_transacao_realizada_em
-    on rinha.transacao (realizada_em desc);
+    on rinha.transacao (realizada_em);
 
 
 

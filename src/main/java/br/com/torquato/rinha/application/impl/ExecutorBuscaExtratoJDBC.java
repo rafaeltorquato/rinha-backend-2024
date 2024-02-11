@@ -6,7 +6,9 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
 import javax.sql.DataSource;
+import java.sql.CallableStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -27,34 +29,17 @@ public class ExecutorBuscaExtratoJDBC implements ExecutorBuscaExtrato {
 
     @Override
     public Resposta buscar(final int idCliente) {
-        if (!cacheClientes.contains(idCliente)) {
-            return clienteInvalido;
+        if (!this.cacheClientes.contains(idCliente)) {
+            return this.clienteInvalido;
         }
 
-        try (final var connection = dataSource.getConnection();
+        try (final var connection = this.dataSource.getConnection();
              final var stmt = connection.prepareCall("{call rinha.retorna_extrato(?)}")) {
             stmt.setInt(1, idCliente);
             stmt.execute();
-            final ResultSet rsSaldo = stmt.getResultSet();
-            rsSaldo.next();
-            final ExtratoCliente.Saldo saldo = new ExtratoCliente.Saldo(
-                    rsSaldo.getInt("limite"),
-                    rsSaldo.getInt("saldo"),
-                    rsSaldo.getTimestamp("data_extrato").toLocalDateTime()
-            );
-            List<ExtratoCliente.Transacao> transacoes = Collections.emptyList();
-            if (stmt.getMoreResults()) {
-                final ResultSet resultTransacoes = stmt.getResultSet();
-                transacoes = new ArrayList<>(resultTransacoes.getFetchSize());
-                while (resultTransacoes.next()) {
-                    transacoes.add(new ExtratoCliente.Transacao(
-                            resultTransacoes.getInt("valor"),
-                            resultTransacoes.getString("tipo"),
-                            resultTransacoes.getString("descricao"),
-                            resultTransacoes.getTimestamp("realizada_em").toLocalDateTime()
-                    ));
-                }
-            }
+
+            final ExtratoCliente.Saldo saldo = getSaldo(stmt);
+            final List<ExtratoCliente.Transacao> transacoes = getTransacoes(stmt);
             return new Resposta(
                     Status.OK,
                     new ExtratoCliente(saldo, transacoes)
@@ -62,5 +47,34 @@ public class ExecutorBuscaExtratoJDBC implements ExecutorBuscaExtrato {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private static ExtratoCliente.Saldo getSaldo(CallableStatement stmt) throws SQLException {
+        final ResultSet rsSaldo = stmt.getResultSet();
+        rsSaldo.next();
+        return new ExtratoCliente.Saldo(
+                rsSaldo.getInt("limite"),
+                rsSaldo.getInt("saldo"),
+                rsSaldo.getTimestamp("data_extrato").toLocalDateTime()
+        );
+    }
+
+    private static List<ExtratoCliente.Transacao> getTransacoes(CallableStatement stmt) throws SQLException {
+        if (!stmt.getMoreResults()) {
+            return Collections.emptyList();
+        }
+
+        final ResultSet rsTransacoes = stmt.getResultSet();
+        final List<ExtratoCliente.Transacao> transacoes = new ArrayList<>(rsTransacoes.getFetchSize());
+
+        while (rsTransacoes.next()) {
+            transacoes.add(new ExtratoCliente.Transacao(
+                    rsTransacoes.getInt("valor"),
+                    rsTransacoes.getString("tipo"),
+                    rsTransacoes.getString("descricao"),
+                    rsTransacoes.getTimestamp("realizada_em").toLocalDateTime()
+            ));
+        }
+        return transacoes;
     }
 }

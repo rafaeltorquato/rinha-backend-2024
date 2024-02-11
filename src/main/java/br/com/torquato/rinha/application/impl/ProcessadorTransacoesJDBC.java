@@ -34,14 +34,14 @@ public class ProcessadorTransacoesJDBC implements ProcessadorTransacoes {
 
     @Override
     public Resposta processar(Solicitacao solicitacao) {
-        if (!cacheClientes.contains(solicitacao.idCliente())) {
-            return clienteInvalido;
+        if (!this.cacheClientes.contains(solicitacao.idCliente())) {
+            return this.clienteInvalido;
         }
         final TransacaoPendente transacaoPendente = solicitacao.transacaoPendente();
         if (!transacaoPendente.isValida()) {
-            return transacaoInvalida;
+            return this.transacaoInvalida;
         }
-        try (final var connection = dataSource.getConnection();
+        try (final var connection = this.dataSource.getConnection();
              final var stmt = connection.prepareCall("{call rinha.processa_transacao(?,?,?,?,?,?)}");) {
             stmt.setInt(1, solicitacao.idCliente());
             stmt.setInt(2, transacaoPendente.valor());
@@ -58,6 +58,6 @@ public class ProcessadorTransacoesJDBC implements ProcessadorTransacoes {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-        return semSaldo;
+        return this.semSaldo;
     }
 }
