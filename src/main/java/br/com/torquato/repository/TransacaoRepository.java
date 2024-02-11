@@ -2,10 +2,8 @@ package br.com.torquato.repository;
 
 import br.com.torquato.JdbcUtil;
 import br.com.torquato.api.data.Extrato;
-import br.com.torquato.api.data.Saldo;
 import br.com.torquato.api.data.TipoTransacao;
 import br.com.torquato.api.data.TransacaoPendente;
-import io.vertx.ext.web.handler.HttpException;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import lombok.extern.slf4j.Slf4j;
@@ -81,30 +79,22 @@ public class TransacaoRepository {
         }
     }
 
-    public Saldo salvarTransacao(int idCliente, TransacaoPendente transacaoPendente) {
-
-        final int valor = switch (transacaoPendente.tipo()) {
-            case c -> transacaoPendente.valor();
-            case d -> transacaoPendente.valor() * -1;
-        };
+    public String salvarTransacao(int idCliente, TransacaoPendente transacaoPendente) {
 
         Connection connection = null;
         CallableStatement stmt = null;
-        Saldo saldo = null;
+        String saldo;
         try {
             connection = dataSource.getConnection();
             stmt = connection.prepareCall("{call rinha.processa_transacao(?,?,?,?,?)}");
 
             stmt.setInt(1, idCliente);
-            stmt.setInt(2, valor);
+            stmt.setInt(2, transacaoPendente.valor());
             stmt.setString(3, transacaoPendente.descricao());
-            stmt.registerOutParameter(4, Types.INTEGER); //limite
+            stmt.setString(4, transacaoPendente.tipo().name());
             stmt.registerOutParameter(5, Types.INTEGER); //saldo
             stmt.execute();
-            final int limite = stmt.getInt(4);
-            if(limite != 0 || !stmt.wasNull()) {
-                saldo = new Saldo(limite, stmt.getInt(5));
-            }
+            saldo = stmt.getString(5);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
             return null;
