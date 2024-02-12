@@ -43,7 +43,7 @@ services:
       resources:
         limits:
           cpus: "0.35"
-          memory: "100MB"
+          memory: "250MB"
     ports:
       - 8080:8080
     depends_on:
@@ -71,7 +71,7 @@ services:
       resources:
         limits:
           cpus: "0.35"
-          memory: "100MB"
+          memory: "250MB"
     ports:
       - 8081:8081
     depends_on:
