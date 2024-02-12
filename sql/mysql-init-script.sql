@@ -60,7 +60,7 @@ DELIMITER |
 create procedure rinha.retorna_extrato(
     IN in_id_cliente int)
 BEGIN
-    SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED;
+    SET SESSION TRANSACTION ISOLATION LEVEL READ UNCOMMITTED ;
 
     START TRANSACTION READ ONLY;
     set @_data_extrato = now(6);
