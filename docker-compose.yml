@@ -1,11 +1,14 @@
 services:
-  mysql:
-    image: mysql:8.3.0-oracle
-    container_name: mysql
+  database:
+    image: mariadb:latest
+    container_name: database
     environment:
-      - 'MYSQL_ROOT_PASSWORD=root'
-      - 'MYSQL_DATABASE=rinha'
+      - 'MARIADB_ROOT_PASSWORD=root'
+      - 'MARIADB_DATABASE=rinha'
       - 'TZ=America/Sao_Paulo'
+      - 'MARIADB_ALLOW_EMPTY_ROOT_PASSWORD: true'
+      - 'MARIADB_MYSQL_LOCALHOST_USER: 1'
+      - 'MARIADB_MYSQL_LOCALHOST_GRANTS: USAGE'
     deploy:
       resources:
         limits:
@@ -17,7 +20,7 @@ services:
     networks:
       - default
     healthcheck:
-      test: [ "CMD-SHELL", "mysql -h localhost -uroot -proot" ]
+      test: [ "CMD", "healthcheck.sh", "--su-mysql", "--connect", "--innodb_initialized" ]
       interval: 5s
       timeout: 5s
       retries: 10
@@ -34,7 +37,7 @@ services:
       - 'QUARKUS_DATASOURCE_JDBC_MAX_SIZE=7'
       - 'QUARKUS_DATASOURCE_JDBC_DETECT_STATEMENT_LEAKS=false'
       - 'QUARKUS_DATASOURCE_JDBC_ACQUISITION_TIMEOUT=10S'
-      - 'QUARKUS_DATASOURCE_JDBC_URL=jdbc:mysql://mysql:3306/rinha'
+      - 'QUARKUS_DATASOURCE_JDBC_URL=jdbc:mariadb://database:3306/rinha'
       - 'QUARKUS_DATASOURCE_USERNAME=root'
       - 'QUARKUS_DATASOURCE_PASSWORD=root'
       - 'TZ=America/Sao_Paulo'
@@ -43,11 +46,11 @@ services:
       resources:
         limits:
           cpus: "0.35"
-          memory: "250MB"
+          memory: "100MB"
     ports:
       - 8080:8080
     depends_on:
-      mysql:
+      database:
         condition: service_healthy
     networks:
       - default
@@ -62,7 +65,7 @@ services:
       - 'QUARKUS_DATASOURCE_JDBC_MAX_SIZE=7'
       - 'QUARKUS_DATASOURCE_JDBC_DETECT_STATEMENT_LEAKS=false'
       - 'QUARKUS_DATASOURCE_JDBC_ACQUISITION_TIMEOUT=10S'
-      - 'QUARKUS_DATASOURCE_JDBC_URL=jdbc:mysql://mysql:3306/rinha'
+      - 'QUARKUS_DATASOURCE_JDBC_URL=jdbc:mariadb://database:3306/rinha'
       - 'QUARKUS_DATASOURCE_USERNAME=root'
       - 'QUARKUS_DATASOURCE_PASSWORD=root'
       - 'TZ=America/Sao_Paulo'
@@ -71,11 +74,11 @@ services:
       resources:
         limits:
           cpus: "0.35"
-          memory: "250MB"
+          memory: "100MB"
     ports:
       - 8081:8081
     depends_on:
-      mysql:
+      database:
         condition: service_healthy
     networks:
       - default

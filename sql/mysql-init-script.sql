@@ -89,8 +89,7 @@ BEGIN
     if (transacoes_json is null) then
         set transacoes_json = JSON_ARRAY();
     end if;
-
-    set out_extrato = JSON_OBJECT('saldo', saldo_json, 'ultimas_transacoes', transacoes_json);
+    set out_extrato = JSON_OBJECT('saldo', JSON_LOOSE(saldo_json), 'ultimas_transacoes', JSON_LOOSE(transacoes_json));
     COMMIT;
 END |
 delimiter ;
