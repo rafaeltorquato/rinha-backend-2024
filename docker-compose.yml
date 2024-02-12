@@ -10,7 +10,7 @@ services:
       resources:
         limits:
           cpus: "0.65"
-          memory: "380MB"
+          memory: "280MB"
     volumes:
       - ./sql/mysql-init-script.sql:/docker-entrypoint-initdb.d/mysql-init-script.sql
       - ./mysql.conf:/etc/mysql/conf.d/config-file.cnf
@@ -34,17 +34,16 @@ services:
       - 'QUARKUS_DATASOURCE_JDBC_MAX_SIZE=7'
       - 'QUARKUS_DATASOURCE_JDBC_DETECT_STATEMENT_LEAKS=false'
       - 'QUARKUS_DATASOURCE_JDBC_ACQUISITION_TIMEOUT=10S'
-      - 'QUARKUS_DATASOURCE_JDBC_URL=jdbc:mysql://mysql:3306/rinha?useServerPrepStmts=true&prepStmtCacheSize=500&prepStmtCacheSqlLimit=1024'
+      - 'QUARKUS_DATASOURCE_JDBC_URL=jdbc:mysql://mysql:3306/rinha'
       - 'QUARKUS_DATASOURCE_USERNAME=root'
       - 'QUARKUS_DATASOURCE_PASSWORD=root'
       - 'TZ=America/Sao_Paulo'
-      - 'JAVA_TOOL_OPTIONS=-XX:ActiveProcessorCount=2'
       - 'QUARKUS_HTTP_PORT=8080'
     deploy:
       resources:
         limits:
           cpus: "0.35"
-          memory: "65MB"
+          memory: "100MB"
     ports:
       - 8080:8080
     depends_on:
@@ -63,17 +62,16 @@ services:
       - 'QUARKUS_DATASOURCE_JDBC_MAX_SIZE=7'
       - 'QUARKUS_DATASOURCE_JDBC_DETECT_STATEMENT_LEAKS=false'
       - 'QUARKUS_DATASOURCE_JDBC_ACQUISITION_TIMEOUT=10S'
-      - 'QUARKUS_DATASOURCE_JDBC_URL=jdbc:mysql://mysql:3306/rinha?useServerPrepStmts=true&prepStmtCacheSize=500&prepStmtCacheSqlLimit=1024'
+      - 'QUARKUS_DATASOURCE_JDBC_URL=jdbc:mysql://mysql:3306/rinha'
       - 'QUARKUS_DATASOURCE_USERNAME=root'
       - 'QUARKUS_DATASOURCE_PASSWORD=root'
       - 'TZ=America/Sao_Paulo'
-      - 'JAVA_TOOL_OPTIONS=-XX:ActiveProcessorCount=2'
       - 'QUARKUS_HTTP_PORT=8081'
     deploy:
       resources:
         limits:
           cpus: "0.35"
-          memory: "65MB"
+          memory: "100MB"
     ports:
       - 8081:8081
     depends_on:
@@ -92,11 +90,11 @@ services:
     depends_on:
       - app1
       - app2
-#    deploy:
-#      resources:
-#        limits:
-#          cpus: "0.15"
-#          memory: "40MB"
+    deploy:
+      resources:
+        limits:
+          cpus: "0.15"
+          memory: "70MB"
     networks:
       - default
 

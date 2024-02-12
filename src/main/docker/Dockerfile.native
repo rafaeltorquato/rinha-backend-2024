@@ -24,4 +24,4 @@ COPY --chown=1001:root target/*-runner /work/application
 EXPOSE 8080
 USER 1001
 
-ENTRYPOINT ["./application", "-XX:ActiveProcessorCount=2","-Dquarkus.http.host=0.0.0.0"]
+ENTRYPOINT ["./application", "-XX:ActiveProcessorCount=2", "-Xms90m", "-Xmx90m", "-Dquarkus.http.host=0.0.0.0"]

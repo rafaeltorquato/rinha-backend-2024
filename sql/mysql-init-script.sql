@@ -5,21 +5,21 @@ SET GLOBAL TRANSACTION ISOLATION LEVEL READ COMMITTED;
 # TODO SELECT * FROM tblname PROCEDURE ANALYSE();
 create table rinha.cliente
 (
-    id     smallint primary key,
+    id     smallint unsigned primary key,
     limite int not null,
     saldo  int not null
 ) ENGINE = INNODB;
 
 create table rinha.transacao
 (
-    id_cliente   smallint    not null,
-    valor        int         not null,
-    tipo         char        not null,
-    descricao    varchar(10) not null,
-    realizada_em datetime(6) not null default now(6)
+    id_cliente   smallint unsigned not null,
+    valor        int unsigned      not null,
+    tipo         char              not null,
+    descricao    varchar(10)       not null,
+    realizada_em datetime(6)       not null default now(6)
 ) ENGINE = INNODB;
 
-create index idx_realizada_em
+create index idx_id_clienterealizada_em
     on rinha.transacao (id_cliente, realizada_em desc);
 
 drop procedure if exists rinha.processa_transacao;
@@ -62,13 +62,15 @@ BEGIN
 
     set @data_extrato = now(6);
 
+    START TRANSACTION READ ONLY;
     select JSON_OBJECT('total', c.saldo, 'limite', c.limite, 'data_extrato',
                        DATE_FORMAT(@data_extrato, '%Y-%m-%dT%H:%i:%s.%fZ'))
     into saldo_json
     from rinha.cliente c
     where c.id = in_id_cliente;
 
-    select JSON_ARRAYAGG(x.object) into transacoes_json
+    select JSON_ARRAYAGG(x.object)
+    into transacoes_json
     from (select JSON_OBJECT('valor',
                              t.valor,
                              'tipo',
@@ -89,6 +91,7 @@ BEGIN
     end if;
 
     set out_extrato = JSON_OBJECT('saldo', saldo_json, 'ultimas_transacoes', transacoes_json);
+    COMMIT;
 END |
 delimiter ;
 
