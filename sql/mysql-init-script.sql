@@ -1,12 +1,12 @@
 drop database if exists rinha;
-create database if not exists rinha;
+create database rinha;
 # TODO SELECT * FROM tblname PROCEDURE ANALYSE();
 create table rinha.cliente
 (
     id     smallint primary key,
     limite int not null,
     saldo  int not null
-) ENGINE = MyISAM;
+) ENGINE = INNODB;
 
 create table rinha.transacao
 (
@@ -15,15 +15,10 @@ create table rinha.transacao
     tipo         char        not null,
     descricao    varchar(10) not null,
     realizada_em datetime(6) not null default now(6)
-) ENGINE = MyISAM,
-  ROW_FORMAT = Fixed;
+) ENGINE = INNODB;
 
 create index idx_realizada_em
-    on rinha.transacao (realizada_em);
-
-create index idx_id_cliente
-    on rinha.transacao (id_cliente);
-
+    on rinha.transacao (id_cliente, realizada_em desc);
 
 drop procedure if exists rinha.processa_transacao;
 DELIMITER |
@@ -36,6 +31,10 @@ create procedure rinha.processa_transacao(
     OUT out_limite int)
 BEGIN
     set @_valor = if(in_tipo = 'd', in_valor * -1, in_valor);
+
+    SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED;
+
+    START TRANSACTION;
     update
         rinha.cliente c
     set c.saldo  = @_saldo := c.saldo + @_valor,
@@ -49,6 +48,8 @@ BEGIN
         set out_saldo = @_saldo;
         set out_limite = @_limite;
     end if;
+
+    COMMIT;
 END |
 
 delimiter ;
@@ -59,7 +60,9 @@ DELIMITER |
 create procedure rinha.retorna_extrato(
     IN in_id_cliente int)
 BEGIN
+    SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED;
 
+    START TRANSACTION READ ONLY;
     set @_data_extrato = now(6);
 
     select c.saldo,
@@ -77,6 +80,8 @@ BEGIN
       and t.realizada_em <= @_data_extrato
     order by t.realizada_em desc
     limit 10;
+
+    COMMIT;
 END |
 delimiter ;
 
@@ -89,9 +94,3 @@ values (1, 100000, 0),
 
 
 # Cache
-SET GLOBAL c_index_cache.key_buffer_size = (SELECT index_length MYISize
-                                            FROM information_schema.tables
-                                            WHERE table_schema = 'rinha'
-                                              AND table_name = 'cliente') * 1024 * 1024;
-CACHE INDEX rinha.cliente IN c_index_cache;
-LOAD INDEX INTO CACHE rinha.cliente;
