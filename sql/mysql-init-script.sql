@@ -1,5 +1,7 @@
 drop database if exists rinha;
 create database rinha;
+SET GLOBAL TRANSACTION ISOLATION LEVEL READ COMMITTED;
+
 # TODO SELECT * FROM tblname PROCEDURE ANALYSE();
 create table rinha.cliente
 (
@@ -31,9 +33,6 @@ create procedure rinha.processa_transacao(
     OUT out_limite int)
 BEGIN
     set @_valor = if(in_tipo = 'd', in_valor * -1, in_valor);
-
-    SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED;
-
     START TRANSACTION;
     update
         rinha.cliente c
@@ -60,8 +59,6 @@ DELIMITER |
 create procedure rinha.retorna_extrato(
     IN in_id_cliente int)
 BEGIN
-    SET SESSION TRANSACTION ISOLATION LEVEL READ UNCOMMITTED ;
-
     START TRANSACTION READ ONLY;
     set @_data_extrato = now(6);
 
