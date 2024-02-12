@@ -57,14 +57,13 @@ create procedure rinha.retorna_extrato(
     IN in_id_cliente int,
     OUT out_extrato json)
 BEGIN
-    declare _data_extrato datetime(6);
     declare saldo_json json;
     declare transacoes_json json;
 
-    set _data_extrato = now(6);
+    set @data_extrato = now(6);
 
     select JSON_OBJECT('total', c.saldo, 'limite', c.limite, 'data_extrato',
-                       DATE_FORMAT(_data_extrato, '%Y-%m-%dT%H:%i:%s.%fZ'))
+                       DATE_FORMAT(@data_extrato, '%Y-%m-%dT%H:%i:%s.%fZ'))
     into saldo_json
     from rinha.cliente c
     where c.id = in_id_cliente;
@@ -81,7 +80,7 @@ BEGIN
 
           from rinha.transacao t
           where t.id_cliente = in_id_cliente
-            and t.realizada_em <= _data_extrato
+            and t.realizada_em <= @data_extrato
           order by t.realizada_em desc
           limit 10) x;
 
