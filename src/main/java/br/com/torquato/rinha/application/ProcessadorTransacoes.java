@@ -7,7 +7,7 @@ public interface ProcessadorTransacoes {
 
     Resposta processar(final Solicitacao solicitacao);
 
-    record Resposta(Status status, SaldoPosTransacao saldo) {
+    record Resposta(Status status, String saldo) {
         public Resposta(Status status){
             this(status, null);
         }

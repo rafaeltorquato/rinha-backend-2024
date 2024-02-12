@@ -2,8 +2,6 @@ package br.com.torquato.rinha.delivery.rest;
 
 import br.com.torquato.rinha.application.ExecutorBuscaExtrato;
 import br.com.torquato.rinha.application.ProcessadorTransacoes;
-import br.com.torquato.rinha.domain.model.ExtratoCliente;
-import br.com.torquato.rinha.domain.model.SaldoPosTransacao;
 import br.com.torquato.rinha.domain.model.TransacaoPendente;
 import io.quarkus.runtime.Startup;
 import io.smallrye.common.annotation.RunOnVirtualThread;
@@ -28,11 +26,11 @@ public class ClientesRestResource {
     @Path(("/{id}/extrato"))
     @Produces(MediaType.APPLICATION_JSON)
     @RunOnVirtualThread
-    public RestResponse<ExtratoCliente> getExtrato(@PathParam("id") final int id) {
+    public RestResponse<String> getExtrato(@PathParam("id") final int id) {
         final var resposta = executorBuscaExtrato.buscar(id);
         return switch (resposta.status()) {
             case OK -> RestResponse.ok(resposta.extratoCliente());
-            case CLIENTE_INVALIDO -> RespostasHttp.STATUS_404_EXTRATO;
+            case CLIENTE_INVALIDO -> RespostasHttp.STATUS_404;
         };
     }
 
@@ -40,14 +38,14 @@ public class ClientesRestResource {
     @Path(("/{id}/transacoes"))
     @Produces(MediaType.APPLICATION_JSON)
     @RunOnVirtualThread
-    public RestResponse<SaldoPosTransacao> postTransacao(@PathParam("id") final int id,
-                                                         final TransacaoPendente transacaoPendente) {
+    public RestResponse<String> postTransacao(@PathParam("id") final int id,
+                                              final TransacaoPendente transacaoPendente) {
         final var solicitacao = new ProcessadorTransacoes.Solicitacao(id, transacaoPendente);
         final var resposta = processadorTransacoes.processar(solicitacao);
         return switch (resposta.status()) {
             case OK -> RestResponse.ok(resposta.saldo());
-            case SEM_SALDO, TRANSACAO_INVALIDA -> RespostasHttp.STATUS_422_SALDO;
-            case CLIENTE_INVALIDO -> RespostasHttp.STATUS_404_SALDO;
+            case SEM_SALDO, TRANSACAO_INVALIDA -> RespostasHttp.STATUS_422;
+            case CLIENTE_INVALIDO -> RespostasHttp.STATUS_404;
         };
     }
 }

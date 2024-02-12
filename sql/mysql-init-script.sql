@@ -29,8 +29,7 @@ create procedure rinha.processa_transacao(
     IN in_valor int,
     IN in_descricao varchar(10),
     IN in_tipo char,
-    OUT out_saldo int,
-    OUT out_limite int)
+    OUT out_saldo json)
 BEGIN
     set @_valor = if(in_tipo = 'd', in_valor * -1, in_valor);
     START TRANSACTION;
@@ -44,10 +43,8 @@ BEGIN
     if @_saldo is not null then
         insert into rinha.transacao(valor, descricao, id_cliente, tipo)
         values (in_valor, in_descricao, in_id_cliente, in_tipo);
-        set out_saldo = @_saldo;
-        set out_limite = @_limite;
+        set out_saldo = JSON_OBJECT('saldo', @_saldo, 'limite', @_limite);
     end if;
-
     COMMIT;
 END |
 
@@ -57,28 +54,42 @@ delimiter ;
 drop procedure if exists rinha.retorna_extrato;
 DELIMITER |
 create procedure rinha.retorna_extrato(
-    IN in_id_cliente int)
+    IN in_id_cliente int,
+    OUT out_extrato json)
 BEGIN
-    START TRANSACTION READ ONLY;
-    set @_data_extrato = now(6);
+    declare _data_extrato datetime(6);
+    declare saldo_json json;
+    declare transacoes_json json;
 
-    select c.saldo,
-           c.limite,
-           @_data_extrato as data_extrato
+    set _data_extrato = now(6);
+
+    select JSON_OBJECT('total', c.saldo, 'limite', c.limite, 'data_extrato',
+                       DATE_FORMAT(_data_extrato, '%Y-%m-%dT%H:%i:%s.%fZ'))
+    into saldo_json
     from rinha.cliente c
     where c.id = in_id_cliente;
 
-    select t.valor,
-           t.tipo,
-           t.descricao,
-           t.realizada_em
-    from rinha.transacao t
-    where t.id_cliente = in_id_cliente
-      and t.realizada_em <= @_data_extrato
-    order by t.realizada_em desc
-    limit 10;
+    select JSON_ARRAYAGG(x.object) into transacoes_json
+    from (select JSON_OBJECT('valor',
+                             t.valor,
+                             'tipo',
+                             t.tipo,
+                             'descricao',
+                             t.descricao,
+                             'realizada_em',
+                             DATE_FORMAT(t.realizada_em, '%Y-%m-%dT%H:%i:%s.%fZ')) object
 
-    COMMIT;
+          from rinha.transacao t
+          where t.id_cliente = in_id_cliente
+            and t.realizada_em <= _data_extrato
+          order by t.realizada_em desc
+          limit 10) x;
+
+    if (transacoes_json is null) then
+        set transacoes_json = JSON_ARRAY();
+    end if;
+
+    set out_extrato = JSON_OBJECT('saldo', saldo_json, 'ultimas_transacoes', transacoes_json);
 END |
 delimiter ;
 

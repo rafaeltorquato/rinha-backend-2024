@@ -1,7 +1,6 @@
 package br.com.torquato.rinha.application.impl;
 
 import br.com.torquato.rinha.application.ProcessadorTransacoes;
-import br.com.torquato.rinha.domain.model.SaldoPosTransacao;
 import br.com.torquato.rinha.domain.model.TransacaoPendente;
 import io.quarkus.runtime.Startup;
 import io.quarkus.runtime.StartupEvent;
@@ -46,18 +45,16 @@ public class ProcessadorTransacoesJDBC implements ProcessadorTransacoes {
             return this.transacaoInvalida;
         }
         try (final var connection = this.dataSource.getConnection();
-             final var stmt = connection.prepareCall("{call rinha.processa_transacao(?,?,?,?,?,?)}");) {
+             final var stmt = connection.prepareCall("{call rinha.processa_transacao(?,?,?,?,?)}");) {
             stmt.setInt(1, solicitacao.idCliente());
             stmt.setInt(2, (int) transacaoPendente.valor());
             stmt.setString(3, transacaoPendente.descricao());
             stmt.setString(4, transacaoPendente.tipo());
             stmt.registerOutParameter(5, Types.VARCHAR); //saldo
-            stmt.registerOutParameter(6, Types.VARCHAR); //limite
             stmt.execute();
-            final int limite = stmt.getInt(5);
-            if (limite != 0 || !stmt.wasNull()) {
-                final SaldoPosTransacao saldo = new SaldoPosTransacao(limite, stmt.getInt(6));
-                return new Resposta(Status.OK, saldo);
+            final String saldoJson = stmt.getString(5);
+            if (saldoJson != null) {
+                return new Resposta(Status.OK, saldoJson);
             }
         } catch (Exception e) {
             throw new RuntimeException(e);
