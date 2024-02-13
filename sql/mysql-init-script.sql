@@ -43,7 +43,7 @@ BEGIN
     if @_saldo is not null then
         insert into rinha.transacao(valor, descricao, id_cliente, tipo)
         values (in_valor, in_descricao, in_id_cliente, in_tipo);
-        set out_saldo = COMPRESS(JSON_OBJECT('saldo', @_saldo, 'limite', @_limite));
+        set out_saldo = COMPRESS(JSON_COMPACT(JSON_OBJECT('saldo', @_saldo, 'limite', @_limite)));
     end if;
     COMMIT;
 END |
@@ -89,7 +89,7 @@ BEGIN
     if (transacoes_json is null) then
         set transacoes_json = JSON_ARRAY();
     end if;
-    set out_extrato = COMPRESS(JSON_OBJECT('saldo', JSON_LOOSE(saldo_json), 'ultimas_transacoes', JSON_LOOSE(transacoes_json)));
+    set out_extrato = COMPRESS(JSON_COMPACT(JSON_OBJECT('saldo', JSON_LOOSE(saldo_json), 'ultimas_transacoes', JSON_LOOSE(transacoes_json))));
     COMMIT;
 END |
 delimiter ;
