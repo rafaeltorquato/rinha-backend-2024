@@ -29,7 +29,7 @@ create procedure rinha.processa_transacao(
     IN in_valor int,
     IN in_descricao varchar(10),
     IN in_tipo char,
-    OUT out_saldo json)
+    OUT out_saldo VARBINARY(100))
 BEGIN
     set @_valor = if(in_tipo = 'd', in_valor * -1, in_valor);
     START TRANSACTION;
@@ -43,7 +43,7 @@ BEGIN
     if @_saldo is not null then
         insert into rinha.transacao(valor, descricao, id_cliente, tipo)
         values (in_valor, in_descricao, in_id_cliente, in_tipo);
-        set out_saldo = JSON_OBJECT('saldo', @_saldo, 'limite', @_limite);
+        set out_saldo = COMPRESS(JSON_OBJECT('saldo', @_saldo, 'limite', @_limite));
     end if;
     COMMIT;
 END |
@@ -55,7 +55,7 @@ drop procedure if exists rinha.retorna_extrato;
 DELIMITER |
 create procedure rinha.retorna_extrato(
     IN in_id_cliente int,
-    OUT out_extrato json)
+    OUT out_extrato VARBINARY(5000))
 BEGIN
     declare saldo_json json;
     declare transacoes_json json;
@@ -89,7 +89,7 @@ BEGIN
     if (transacoes_json is null) then
         set transacoes_json = JSON_ARRAY();
     end if;
-    set out_extrato = JSON_OBJECT('saldo', JSON_LOOSE(saldo_json), 'ultimas_transacoes', JSON_LOOSE(transacoes_json));
+    set out_extrato = COMPRESS(JSON_OBJECT('saldo', JSON_LOOSE(saldo_json), 'ultimas_transacoes', JSON_LOOSE(transacoes_json)));
     COMMIT;
 END |
 delimiter ;

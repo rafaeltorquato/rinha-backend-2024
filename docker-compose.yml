@@ -30,6 +30,8 @@ services:
       nofile:
         soft: 196608
         hard: 196608
+    ports:
+      - 3306:3306
 
   app1:
     container_name: app1

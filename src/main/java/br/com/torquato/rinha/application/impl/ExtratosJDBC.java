@@ -1,5 +1,6 @@
 package br.com.torquato.rinha.application.impl;
 
+import br.com.torquato.rinha.ZipUtil;
 import br.com.torquato.rinha.application.Extratos;
 import io.quarkus.runtime.Startup;
 import io.quarkus.runtime.StartupEvent;
@@ -32,9 +33,9 @@ public class ExtratosJDBC implements Extratos {
         try (final var connection = this.dataSource.getConnection();
              final var stmt = connection.prepareCall("{call rinha.retorna_extrato(?,?)}")) {
             stmt.setInt(1, idCliente);
-            stmt.registerOutParameter(2, Types.VARCHAR);
+            stmt.registerOutParameter(2, Types.VARBINARY);
             stmt.execute();
-            return new Resposta(stmt.getString(2));
+            return new Resposta(ZipUtil.decompressSQLCompression(stmt.getBytes(2)));
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
