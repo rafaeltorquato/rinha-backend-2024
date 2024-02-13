@@ -2,6 +2,8 @@ services:
   database:
     image: mariadb:latest
     container_name: database
+    security_opt:
+      - seccomp:unconfined
     environment:
       - 'MARIADB_ROOT_PASSWORD=root'
       - 'MARIADB_DATABASE=rinha'
@@ -24,8 +26,10 @@ services:
       interval: 5s
       timeout: 5s
       retries: 10
-    ports:
-      - 3306:3306
+    ulimits:
+      nofile:
+        soft: 196608
+        hard: 196608
 
   app1:
     container_name: app1
@@ -46,14 +50,16 @@ services:
       resources:
         limits:
           cpus: "0.35"
-          memory: "100MB"
-    ports:
-      - 8080:8080
+          memory: "90MB"
     depends_on:
       database:
         condition: service_healthy
     networks:
       - default
+    ulimits:
+      nofile:
+        soft: 98304
+        hard: 98304
 
   app2:
     container_name: app2
@@ -74,14 +80,16 @@ services:
       resources:
         limits:
           cpus: "0.35"
-          memory: "100MB"
-    ports:
-      - 8081:8081
+          memory: "90MB"
     depends_on:
       database:
         condition: service_healthy
     networks:
       - default
+    ulimits:
+      nofile:
+        soft: 98304
+        hard: 98304
 
 #  nginx:
 #    container_name: nginx
@@ -119,7 +127,11 @@ services:
       resources:
         limits:
           cpus: "0.15"
-          memory: "70MB"
+          memory: "90MB"
+    ulimits:
+      nofile:
+        soft: 98304
+        hard: 98304
 
 networks:
   default:
