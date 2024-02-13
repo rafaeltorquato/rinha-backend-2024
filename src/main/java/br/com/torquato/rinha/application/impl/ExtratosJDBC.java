@@ -1,6 +1,6 @@
 package br.com.torquato.rinha.application.impl;
 
-import br.com.torquato.rinha.application.ExecutorBuscaExtrato;
+import br.com.torquato.rinha.application.Extratos;
 import io.quarkus.runtime.Startup;
 import io.quarkus.runtime.StartupEvent;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -15,9 +15,9 @@ import java.util.Set;
 @Slf4j
 @Startup
 @ApplicationScoped
-public class ExecutorBuscaExtratoJDBC implements ExecutorBuscaExtrato {
+public class ExtratosJDBC implements Extratos {
 
-    private final ExecutorBuscaExtrato.Resposta clienteInvalido = new ExecutorBuscaExtrato.Resposta(
+    private final Extratos.Resposta clienteInvalido = new Extratos.Resposta(
             Status.CLIENTE_INVALIDO
     );
 

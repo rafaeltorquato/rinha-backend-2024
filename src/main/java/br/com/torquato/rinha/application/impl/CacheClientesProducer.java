@@ -20,7 +20,7 @@ public class CacheClientesProducer {
     @Produces
     @ApplicationScoped
     public Set<Integer> clientesCache() {
-        try (final var connection = dataSource.getConnection();
+        try (final var connection = this.dataSource.getConnection();
              final var preparedStatement = connection.prepareStatement("select id from rinha.cliente");
              final var resultSet = preparedStatement.executeQuery()) {
 

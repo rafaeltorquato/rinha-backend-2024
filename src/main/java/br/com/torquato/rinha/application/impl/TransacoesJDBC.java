@@ -1,6 +1,6 @@
 package br.com.torquato.rinha.application.impl;
 
-import br.com.torquato.rinha.application.ProcessadorTransacoes;
+import br.com.torquato.rinha.application.Transacoes;
 import br.com.torquato.rinha.domain.model.TransacaoPendente;
 import io.quarkus.runtime.Startup;
 import io.quarkus.runtime.StartupEvent;
@@ -16,7 +16,7 @@ import java.util.Set;
 @Startup
 @Slf4j
 @ApplicationScoped
-public class ProcessadorTransacoesJDBC implements ProcessadorTransacoes {
+public class TransacoesJDBC implements Transacoes {
 
     private final Resposta transacaoInvalida = new Resposta(
             Status.TRANSACAO_INVALIDA

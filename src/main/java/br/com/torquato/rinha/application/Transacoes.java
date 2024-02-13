@@ -1,9 +1,8 @@
 package br.com.torquato.rinha.application;
 
-import br.com.torquato.rinha.domain.model.SaldoPosTransacao;
 import br.com.torquato.rinha.domain.model.TransacaoPendente;
 
-public interface ProcessadorTransacoes {
+public interface Transacoes {
 
     Resposta processar(final Solicitacao solicitacao);
 

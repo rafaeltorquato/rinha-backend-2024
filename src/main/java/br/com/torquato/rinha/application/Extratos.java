@@ -1,6 +1,6 @@
 package br.com.torquato.rinha.application;
 
-public interface ExecutorBuscaExtrato {
+public interface Extratos {
 
 
     Resposta buscar(final int idCliente);
