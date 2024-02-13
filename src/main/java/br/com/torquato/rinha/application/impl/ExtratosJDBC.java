@@ -17,10 +17,6 @@ import java.util.Set;
 @ApplicationScoped
 public class ExtratosJDBC implements Extratos {
 
-    private final Extratos.Resposta clienteInvalido = new Extratos.Resposta(
-            Status.CLIENTE_INVALIDO
-    );
-
     @Inject
     DataSource dataSource;
 
@@ -30,7 +26,7 @@ public class ExtratosJDBC implements Extratos {
     @Override
     public Resposta buscar(final int idCliente) {
         if (!this.cacheClientes.contains(idCliente)) {
-            return this.clienteInvalido;
+            return CLIENTE_INVALIDO;
         }
 
         try (final var connection = this.dataSource.getConnection();
@@ -38,14 +34,12 @@ public class ExtratosJDBC implements Extratos {
             stmt.setInt(1, idCliente);
             stmt.registerOutParameter(2, Types.VARCHAR);
             stmt.execute();
-            return new Resposta(
-                    Status.OK,
-                    stmt.getString(2)
-            );
+            return new Resposta(stmt.getString(2));
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
+
     void onStart(@Observes StartupEvent evt) {
         this.buscar(this.cacheClientes.stream().findFirst().get());
         log.warn("Extrato warn up!");

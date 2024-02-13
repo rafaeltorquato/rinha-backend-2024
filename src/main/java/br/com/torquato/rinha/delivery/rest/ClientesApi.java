@@ -16,7 +16,7 @@ import static org.jboss.resteasy.reactive.RestResponse.Status.NOT_FOUND;
 @Slf4j
 @Startup
 @Path("/clientes")
-public class ClientesRestResource {
+public class ClientesApi {
     private static final RestResponse<String> STATUS_422 = RestResponse.status(
             422
     );

@@ -11,23 +11,13 @@ import lombok.extern.slf4j.Slf4j;
 
 import javax.sql.DataSource;
 import java.sql.Types;
+import java.util.Optional;
 import java.util.Set;
 
 @Startup
 @Slf4j
 @ApplicationScoped
 public class TransacoesJDBC implements Transacoes {
-
-    private final Resposta transacaoInvalida = new Resposta(
-            Status.TRANSACAO_INVALIDA
-    );
-    private final Resposta semSaldo = new Resposta(
-            Status.SEM_SALDO
-    );
-
-    private final Resposta clienteInvalido = new Resposta(
-            Status.CLIENTE_INVALIDO
-    );
 
     @Inject
     DataSource dataSource;
@@ -38,11 +28,11 @@ public class TransacoesJDBC implements Transacoes {
     @Override
     public Resposta processar(Solicitacao solicitacao) {
         if (!this.cacheClientes.contains(solicitacao.idCliente())) {
-            return this.clienteInvalido;
+            return CLIENTE_INVALIDO;
         }
         final TransacaoPendente transacaoPendente = solicitacao.transacaoPendente();
         if (!transacaoPendente.isValida()) {
-            return this.transacaoInvalida;
+            return TRANSACAO_INVALIDA;
         }
         try (final var connection = this.dataSource.getConnection();
              final var stmt = connection.prepareCall("{call rinha.processa_transacao(?,?,?,?,?)}");) {
@@ -52,14 +42,12 @@ public class TransacoesJDBC implements Transacoes {
             stmt.setString(4, transacaoPendente.tipo());
             stmt.registerOutParameter(5, Types.VARCHAR); //saldo
             stmt.execute();
-            final String saldoJson = stmt.getString(5);
-            if (saldoJson != null) {
-                return new Resposta(Status.OK, saldoJson);
-            }
+            return Optional.ofNullable(stmt.getString(5))
+                    .map(Resposta::new)
+                    .orElse(SEM_SALDO);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-        return this.semSaldo;
     }
 
     void onStart(@Observes StartupEvent evt) {

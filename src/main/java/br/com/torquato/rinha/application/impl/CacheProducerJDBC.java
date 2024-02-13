@@ -10,9 +10,12 @@ import java.sql.SQLException;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * Basedo no requisito da Rinha, o número de clientes é fixo e conhecido.
+ */
 @Startup
 @ApplicationScoped
-public class CacheClientesProducer {
+public class CacheProducerJDBC {
 
     @Inject
     DataSource dataSource;
