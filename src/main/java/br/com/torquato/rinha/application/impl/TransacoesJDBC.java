@@ -1,6 +1,5 @@
 package br.com.torquato.rinha.application.impl;
 
-import br.com.torquato.rinha.ZipUtil;
 import br.com.torquato.rinha.application.Transacoes;
 import br.com.torquato.rinha.domain.model.TransacaoPendente;
 import io.quarkus.runtime.Startup;
@@ -13,6 +12,8 @@ import lombok.extern.slf4j.Slf4j;
 import javax.sql.DataSource;
 import java.sql.Types;
 import java.util.Set;
+
+import static br.com.torquato.rinha.application.impl.ZlibUtil.decompressMysqlCompression;
 
 @Startup
 @Slf4j
@@ -42,9 +43,9 @@ public class TransacoesJDBC implements Transacoes {
             stmt.setString(4, transacaoPendente.tipo());
             stmt.registerOutParameter(5, Types.BLOB); //saldo
             stmt.execute();
-            byte[] saldoGzip = stmt.getBytes(5);
-            if (saldoGzip != null) {
-                return new Resposta(ZipUtil.decompressSQLCompression(saldoGzip));
+            byte[] saldoZip = stmt.getBytes(5);
+            if (saldoZip != null) {
+                return new Resposta(decompressMysqlCompression(saldoZip));
             }
             return SEM_SALDO;
         } catch (Exception e) {
@@ -57,6 +58,6 @@ public class TransacoesJDBC implements Transacoes {
                 this.cacheClientes.stream().findFirst().get(),
                 new TransacaoPendente(Integer.MAX_VALUE, "d", "abc"))
         );
-        log.warn("Transacao warn up!");
+        log.warn("Transacao warm up!");
     }
 }
