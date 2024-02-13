@@ -12,11 +12,11 @@ public interface Transacoes {
 
     Resposta processar(final Solicitacao solicitacao);
 
-    record Resposta(Status status, String saldo) {
+    record Resposta(Status status, byte[] saldo) {
         public Resposta(Status status) {
             this(status, null);
         }
-        public Resposta(String saldo) {
+        public Resposta(byte[] saldo) {
             this(Status.OK, saldo);
         }
     }

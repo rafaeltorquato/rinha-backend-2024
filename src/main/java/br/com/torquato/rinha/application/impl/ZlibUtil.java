@@ -40,7 +40,7 @@ class ZlibUtil {
     }
 
     //ignore first four bytes which denote length of uncompressed data. use rest of the array for decompression
-    private static byte[] removeBytes(byte[] input) {
+    static byte[] removeBytes(byte[] input) {
         return Arrays.copyOfRange(input, 4, input.length);
     }
 }

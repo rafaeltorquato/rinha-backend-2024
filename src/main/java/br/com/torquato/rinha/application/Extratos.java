@@ -7,12 +7,12 @@ public interface Extratos {
 
     Resposta buscar(final int idCliente);
 
-    record Resposta(Status status, String extratoCliente) {
+    record Resposta(Status status, byte[] extratoCliente) {
         public Resposta(Status status) {
             this(status, null);
         }
 
-        public Resposta(String extratoCliente) {
+        public Resposta(byte[] extratoCliente) {
             this(Status.OK, extratoCliente);
         }
     }

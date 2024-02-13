@@ -7,6 +7,7 @@ import io.quarkus.runtime.Startup;
 import io.smallrye.common.annotation.RunOnVirtualThread;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.MediaType;
 import lombok.extern.slf4j.Slf4j;
 import org.jboss.resteasy.reactive.RestResponse;
@@ -40,11 +41,15 @@ public class ClientesApi {
         final var resposta = this.extratos.buscar(id);
 
         return switch (resposta.status()) {
-            case OK -> new RestResponseBuilderImpl<byte[]>()
-                    .header("Content-Type", MediaType.APPLICATION_JSON)
-                    .encoding("deflate")
-                    .entity(resposta.extratoCliente().getBytes(StandardCharsets.UTF_8))
-                    .build();
+            case OK -> {
+                byte[] bytes = resposta.extratoCliente();
+                yield new RestResponseBuilderImpl<byte[]>()
+                        .header("Content-Type", MediaType.APPLICATION_JSON)
+                        .header(HttpHeaders.CONTENT_LENGTH, bytes.length)
+                        .encoding("deflate")
+                        .entity(bytes)
+                        .build();
+            }
             case CLIENTE_INVALIDO -> STATUS_404;
         };
     }
@@ -58,11 +63,15 @@ public class ClientesApi {
         final var solicitacao = new Transacoes.Solicitacao(id, transacaoPendente);
         final var resposta = this.transacoes.processar(solicitacao);
         return switch (resposta.status()) {
-            case OK -> new RestResponseBuilderImpl<byte[]>()
-                    .header("Content-Type", MediaType.APPLICATION_JSON)
-                    .encoding("deflate")
-                    .entity(resposta.saldo().getBytes(StandardCharsets.UTF_8))
-                    .build();
+            case OK -> {
+                byte[] bytes = resposta.saldo();
+                yield new RestResponseBuilderImpl<byte[]>()
+                        .header("Content-Type", MediaType.APPLICATION_JSON)
+                        .header(HttpHeaders.CONTENT_LENGTH, bytes.length)
+                        .encoding("deflate")
+                        .entity(bytes)
+                        .build();
+            }
             case SEM_SALDO, TRANSACAO_INVALIDA -> STATUS_422;
             case CLIENTE_INVALIDO -> STATUS_404;
         };
