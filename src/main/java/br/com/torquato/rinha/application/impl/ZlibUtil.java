@@ -4,8 +4,6 @@ package br.com.torquato.rinha.application.impl;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -33,8 +31,16 @@ class ZlibUtil {
     }
 
     static String decompressMysqlCompression(final byte[] input) {
-        //ignore first four bytes which denote length of uncompressed data. use rest of the array for decompression
-        final byte[] data = Arrays.copyOfRange(input, 4, input.length);
+        final byte[] data = removeBytes(input);
         return new String(decompressZLib(data), StandardCharsets.UTF_8);
+    }
+
+    static String removeLenghtBytes(byte[] input) {
+        return new String(removeBytes(input), StandardCharsets.UTF_8);
+    }
+
+    //ignore first four bytes which denote length of uncompressed data. use rest of the array for decompression
+    private static byte[] removeBytes(byte[] input) {
+        return Arrays.copyOfRange(input, 4, input.length);
     }
 }

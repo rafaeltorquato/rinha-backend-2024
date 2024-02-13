@@ -13,7 +13,7 @@ import javax.sql.DataSource;
 import java.sql.Types;
 import java.util.Set;
 
-import static br.com.torquato.rinha.application.impl.ZlibUtil.decompressMysqlCompression;
+import static br.com.torquato.rinha.application.impl.ZlibUtil.removeLenghtBytes;
 
 @Startup
 @Slf4j
@@ -45,7 +45,7 @@ public class TransacoesJDBC implements Transacoes {
             stmt.execute();
             byte[] saldoZip = stmt.getBytes(5);
             if (saldoZip != null) {
-                return new Resposta(decompressMysqlCompression(saldoZip));
+                return new Resposta(removeLenghtBytes(saldoZip));
             }
             return SEM_SALDO;
         } catch (Exception e) {

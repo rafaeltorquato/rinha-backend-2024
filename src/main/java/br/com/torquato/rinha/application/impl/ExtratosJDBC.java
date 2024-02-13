@@ -12,7 +12,7 @@ import javax.sql.DataSource;
 import java.sql.Types;
 import java.util.Set;
 
-import static br.com.torquato.rinha.application.impl.ZlibUtil.decompressMysqlCompression;
+import static br.com.torquato.rinha.application.impl.ZlibUtil.removeLenghtBytes;
 
 @Slf4j
 @Startup
@@ -36,7 +36,7 @@ public class ExtratosJDBC implements Extratos {
             stmt.setInt(1, idCliente);
             stmt.registerOutParameter(2, Types.VARBINARY);
             stmt.execute();
-            return new Resposta(decompressMysqlCompression(stmt.getBytes(2)));
+            return new Resposta(removeLenghtBytes(stmt.getBytes(2)));
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

@@ -10,6 +10,9 @@ import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import lombok.extern.slf4j.Slf4j;
 import org.jboss.resteasy.reactive.RestResponse;
+import org.jboss.resteasy.reactive.server.jaxrs.RestResponseBuilderImpl;
+
+import java.nio.charset.StandardCharsets;
 
 import static org.jboss.resteasy.reactive.RestResponse.Status.NOT_FOUND;
 
@@ -17,10 +20,10 @@ import static org.jboss.resteasy.reactive.RestResponse.Status.NOT_FOUND;
 @Startup
 @Path("/clientes")
 public class ClientesApi {
-    private static final RestResponse<String> STATUS_422 = RestResponse.status(
+    private static final RestResponse<byte[]> STATUS_422 = RestResponse.status(
             422
     );
-    private static final RestResponse<String> STATUS_404 = RestResponse.status(
+    private static final RestResponse<byte[]> STATUS_404 = RestResponse.status(
             NOT_FOUND.getStatusCode()
     );
 
@@ -32,12 +35,16 @@ public class ClientesApi {
 
     @GET
     @Path(("/{id}/extrato"))
-    @Produces(MediaType.APPLICATION_JSON)
     @RunOnVirtualThread
-    public RestResponse<String> getExtrato(@PathParam("id") final int id) {
+    public RestResponse<byte[]> getExtrato(@PathParam("id") final int id) {
         final var resposta = this.extratos.buscar(id);
+
         return switch (resposta.status()) {
-            case OK -> RestResponse.ok(resposta.extratoCliente());
+            case OK -> new RestResponseBuilderImpl<byte[]>()
+                    .header("Content-Type", MediaType.APPLICATION_JSON)
+                    .encoding("deflate")
+                    .entity(resposta.extratoCliente().getBytes(StandardCharsets.UTF_8))
+                    .build();
             case CLIENTE_INVALIDO -> STATUS_404;
         };
     }
@@ -46,12 +53,16 @@ public class ClientesApi {
     @Path(("/{id}/transacoes"))
     @Produces(MediaType.APPLICATION_JSON)
     @RunOnVirtualThread
-    public RestResponse<String> postTransacao(@PathParam("id") final int id,
+    public RestResponse<byte[]> postTransacao(@PathParam("id") final int id,
                                               final TransacaoPendente transacaoPendente) {
         final var solicitacao = new Transacoes.Solicitacao(id, transacaoPendente);
         final var resposta = this.transacoes.processar(solicitacao);
         return switch (resposta.status()) {
-            case OK -> RestResponse.ok(resposta.saldo());
+            case OK -> new RestResponseBuilderImpl<byte[]>()
+                    .header("Content-Type", MediaType.APPLICATION_JSON)
+                    .encoding("deflate")
+                    .entity(resposta.saldo().getBytes(StandardCharsets.UTF_8))
+                    .build();
             case SEM_SALDO, TRANSACAO_INVALIDA -> STATUS_422;
             case CLIENTE_INVALIDO -> STATUS_404;
         };
