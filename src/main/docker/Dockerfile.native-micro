@@ -27,4 +27,4 @@ COPY --chown=1001:root target/*-runner /work/application
 EXPOSE 8080
 USER 1001
 
-ENTRYPOINT ["./application", "-XX:ActiveProcessorCount=2", "-Xms90m", "-Xmx90m", "-Dquarkus.http.host=0.0.0.0"]
+ENTRYPOINT ["./application", "-Dquarkus.http.host=0.0.0.0", "-XX:MaximumHeapSizePercent=95", "-XX:MaximumYoungGenerationSizePercent=95", "-XX:PercentTimeInIncrementalCollection=90", "-XX:+CollectYoungGenerationSeparately", "-XX:ActiveProcessorCount=2"]
