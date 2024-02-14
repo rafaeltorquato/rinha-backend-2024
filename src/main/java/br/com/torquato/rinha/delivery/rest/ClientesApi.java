@@ -13,8 +13,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.jboss.resteasy.reactive.RestResponse;
 import org.jboss.resteasy.reactive.server.jaxrs.RestResponseBuilderImpl;
 
-import java.nio.charset.StandardCharsets;
-
 import static org.jboss.resteasy.reactive.RestResponse.Status.NOT_FOUND;
 
 @Slf4j

@@ -13,7 +13,6 @@ import java.sql.Types;
 import java.util.Set;
 
 import static br.com.torquato.rinha.application.impl.ZlibUtil.removeBytes;
-import static br.com.torquato.rinha.application.impl.ZlibUtil.removeLenghtBytes;
 
 @Slf4j
 @Startup

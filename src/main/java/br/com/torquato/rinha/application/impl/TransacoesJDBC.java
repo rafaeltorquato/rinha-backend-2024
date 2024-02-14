@@ -14,7 +14,6 @@ import java.sql.Types;
 import java.util.Set;
 
 import static br.com.torquato.rinha.application.impl.ZlibUtil.removeBytes;
-import static br.com.torquato.rinha.application.impl.ZlibUtil.removeLenghtBytes;
 
 @Startup
 @Slf4j
@@ -37,12 +36,12 @@ public class TransacoesJDBC implements Transacoes {
             return TRANSACAO_INVALIDA;
         }
         try (final var connection = this.dataSource.getConnection();
-             final var stmt = connection.prepareCall("{call rinha.processa_transacao(?,?,?,?,?)}");) {
+             final var stmt = connection.prepareCall("{call rinha.processa_transacao(?,?,?,?,?)}")) {
             stmt.setInt(1, solicitacao.idCliente());
             stmt.setInt(2, (int) transacaoPendente.valor());
             stmt.setString(3, transacaoPendente.descricao());
             stmt.setString(4, transacaoPendente.tipo());
-            stmt.registerOutParameter(5, Types.BLOB); //saldo
+            stmt.registerOutParameter(5, Types.VARBINARY); //saldo
             stmt.execute();
             byte[] saldoZip = stmt.getBytes(5);
             if (saldoZip != null) {
