@@ -6,7 +6,10 @@ import br.com.torquato.rinha.domain.model.TransacaoPendente;
 import io.quarkus.runtime.Startup;
 import io.smallrye.common.annotation.RunOnVirtualThread;
 import jakarta.inject.Inject;
-import jakarta.ws.rs.*;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.MediaType;
 import lombok.extern.slf4j.Slf4j;
@@ -19,12 +22,14 @@ import static org.jboss.resteasy.reactive.RestResponse.Status.NOT_FOUND;
 @Startup
 @Path("/clientes")
 public class ClientesApi {
-    private static final RestResponse<byte[]> STATUS_422 = RestResponse.status(
-            422
-    );
-    private static final RestResponse<byte[]> STATUS_404 = RestResponse.status(
-            NOT_FOUND.getStatusCode()
-    );
+    private static final RestResponse<byte[]> STATUS_422 = new RestResponseBuilderImpl<byte[]>()
+            .header("Content-Type", MediaType.APPLICATION_JSON)
+            .status(422)
+            .build();
+    private static final RestResponse<byte[]> STATUS_404 = new RestResponseBuilderImpl<byte[]>()
+            .header("Content-Type", MediaType.APPLICATION_JSON)
+            .status(NOT_FOUND.getStatusCode())
+            .build();
 
     @Inject
     Transacoes transacoes;
@@ -54,7 +59,6 @@ public class ClientesApi {
 
     @POST
     @Path(("/{id}/transacoes"))
-    @Produces(MediaType.APPLICATION_JSON)
     @RunOnVirtualThread
     public RestResponse<byte[]> postTransacao(@PathParam("id") final int id,
                                               final TransacaoPendente transacaoPendente) {
