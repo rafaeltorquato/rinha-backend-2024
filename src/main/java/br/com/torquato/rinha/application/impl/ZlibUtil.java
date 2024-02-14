@@ -4,28 +4,24 @@ package br.com.torquato.rinha.application.impl;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
-import java.util.zip.DataFormatException;
 import java.util.zip.Inflater;
+import java.util.zip.InflaterInputStream;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 class ZlibUtil {
 
     static byte[] decompressZLib(final byte[] data) {
-        final Inflater inflater = new Inflater();
-        inflater.setInput(data);
 
-        try (final var out = new ByteArrayOutputStream(data.length)) {
-            final byte[] buffer = new byte[1024];
-            while (!inflater.finished()) {
-                int count = inflater.inflate(buffer);
-                out.write(buffer, 0, count);
-            }
+        try (final var in = new InflaterInputStream(new ByteArrayInputStream(data), new Inflater());
+             final var out = new ByteArrayOutputStream()) {
+            in.transferTo(out);
             return out.toByteArray();
-        } catch (IOException | DataFormatException ioe) {
+        } catch (IOException ioe) {
             throw new RuntimeException(ioe);
         }
     }
