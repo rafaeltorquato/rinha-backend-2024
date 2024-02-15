@@ -27,7 +27,7 @@ public class TransacoesJDBC implements Transacoes {
     Set<Integer> cacheClientes;
 
     @Override
-    public Resposta processar(Solicitacao solicitacao) {
+    public Resposta processar(final Solicitacao solicitacao) {
         if (!this.cacheClientes.contains(solicitacao.idCliente())) {
             return CLIENTE_INVALIDO;
         }
@@ -43,7 +43,7 @@ public class TransacoesJDBC implements Transacoes {
             stmt.setString(4, transacaoPendente.tipo());
             stmt.registerOutParameter(5, Types.VARBINARY); //saldo
             stmt.execute();
-            byte[] saldoZip = stmt.getBytes(5);
+            final byte[] saldoZip = stmt.getBytes(5);
             if (saldoZip != null) {
                 return new Resposta(removeBytes(saldoZip));
             }
@@ -53,7 +53,7 @@ public class TransacoesJDBC implements Transacoes {
         }
     }
 
-    void onStart(@Observes StartupEvent evt) {
+    void onStart(@Observes final StartupEvent evt) {
         this.processar(new Solicitacao(
                 this.cacheClientes.stream().findFirst().get(),
                 new TransacaoPendente(Integer.MAX_VALUE, "d", "abc"))

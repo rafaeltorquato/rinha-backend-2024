@@ -42,7 +42,7 @@ public class ExtratosJDBC implements Extratos {
         }
     }
 
-    void onStart(@Observes StartupEvent evt) {
+    void onStart(@Observes final StartupEvent evt) {
         this.buscar(this.cacheClientes.stream().findFirst().get());
         log.warn("Extrato warm up!");
     }
