@@ -55,7 +55,7 @@ drop procedure if exists rinha.retorna_extrato;
 DELIMITER |
 create procedure rinha.retorna_extrato(
     IN in_id_cliente int,
-    OUT out_extrato VARBINARY(5000))
+    OUT out_extrato VARBINARY(1000))
 BEGIN
     declare saldo_json json;
     declare transacoes_json json;

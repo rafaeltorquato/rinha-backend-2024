@@ -3,6 +3,9 @@ quarkus:
     level: WARN
   http:
     port: 8080
+    tcp-quick-ack: true
+    tcp-cork: true
+    tcp-fast-open: true
   datasource:
     db-kind: mariadb
     username: root
