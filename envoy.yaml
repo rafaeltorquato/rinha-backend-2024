@@ -26,25 +26,11 @@ static_resources:
                         - match: { prefix: "/" }
                           route: { cluster: some_service }
                 http_filters:
-                  - name: envoy.filters.http.decompressor
-                    typed_config:
-                      "@type": type.googleapis.com/envoy.extensions.filters.http.decompressor.v3.Decompressor
-                      decompressor_library:
-                        name: large
-                        typed_config:
-                          "@type": "type.googleapis.com/envoy.extensions.compression.gzip.decompressor.v3.Gzip"
-                          window_bits: 12
-                          chunk_size: 16384
-                      request_direction_config:
-                        common_config:
-                          enabled:
-                            default_value: false
-                            runtime_key: request_decompressor_enabled
                   - name: envoy.filters.http.router
   clusters:
     - name: some_service
       connect_timeout: 2s
-      type: STRICT_DNS
+      type: STATIC
       lb_policy: ROUND_ROBIN
       load_assignment:
         cluster_name: some_service
@@ -53,10 +39,10 @@ static_resources:
               - endpoint:
                   address:
                     socket_address:
-                      address: "app1"
+                      address: 127.0.0.1
                       port_value: 8080
               - endpoint:
                   address:
                     socket_address:
-                      address: "app2"
+                      address: 127.0.0.1
                       port_value: 8081
