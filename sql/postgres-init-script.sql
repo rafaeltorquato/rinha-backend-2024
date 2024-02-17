@@ -2,16 +2,6 @@
 -- create database rinha;
 -- \c rinha
 
--- select
---     c.id,
---     c.saldo,
---     sum(case when tipo = ''  then valor * -1 else valor end)  saldo_calculado
--- from
---     rinha.cliente c
---         inner join rinha.transacao t
---                    on t.id_cliente = c.id
--- group by c.id;
-
 drop schema if exists rinha CASCADE;
 create schema rinha;
 
@@ -24,7 +14,6 @@ create table rinha.cliente
 
 create table rinha.transacao
 (
-    id           serial primary key not null,
     id_cliente   smallint           not null,
     valor        int                not null,
     tipo         char               not null,
@@ -46,7 +35,6 @@ AS
 $$
 DECLARE
     _valor int;
-    _ok    int;
 BEGIN
     if in_tipo = 'd' then
         _valor := in_valor * -1;
@@ -59,12 +47,12 @@ BEGIN
                 set saldo = c.saldo + _valor
                 where c.id = in_id_cliente
                     and (in_tipo = 'c' or (c.saldo + _valor) >= (c.limite * -1))
-                returning json_build_object('saldo', saldo, 'limite', limite) object, 1 ok)
-    select object, ok
-    into out_saldo, _ok
+                returning json_build_object('saldo', saldo, 'limite', limite) object)
+    select object
+    into out_saldo
     from atualizar;
 
-    if _ok = 1 then
+    if out_saldo is not null then
         insert into rinha.transacao(valor, descricao, id_cliente, tipo)
         values (in_valor, in_descricao, in_id_cliente, in_tipo);
     end if;
