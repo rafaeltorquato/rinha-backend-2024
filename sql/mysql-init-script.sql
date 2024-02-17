@@ -12,11 +12,12 @@ create table rinha.cliente
 
 create table rinha.transacao
 (
-    id_cliente   smallint unsigned not null,
-    valor        int unsigned      not null,
-    tipo         char              not null,
-    descricao    varchar(10)       not null,
-    realizada_em datetime(6)       not null default now(6)
+    id           serial primary key not null,
+    id_cliente   smallint unsigned  not null,
+    valor        int unsigned       not null,
+    tipo         char               not null,
+    descricao    varchar(10)        not null,
+    realizada_em datetime(6)        not null default now(6)
 ) ENGINE = INNODB;
 
 create index idx_id_clienterealizada_em
@@ -82,14 +83,15 @@ BEGIN
 
           from rinha.transacao t
           where t.id_cliente = in_id_cliente
-            and t.realizada_em <= @data_extrato
           order by t.realizada_em desc
           limit 10) x;
 
     if (transacoes_json is null) then
         set transacoes_json = JSON_ARRAY();
     end if;
-    set out_extrato = COMPRESS(JSON_COMPACT(JSON_OBJECT('saldo', JSON_LOOSE(saldo_json), 'ultimas_transacoes', JSON_LOOSE(transacoes_json))));
+    set out_extrato =
+            COMPRESS(JSON_COMPACT(JSON_OBJECT('saldo', JSON_LOOSE(saldo_json), 'ultimas_transacoes',
+                                              JSON_LOOSE(transacoes_json))));
     COMMIT;
 END |
 delimiter ;
