@@ -14,7 +14,7 @@ create table rinha.transacao
 (
     id           serial primary key not null,
     id_cliente   smallint unsigned  not null,
-    valor        int unsigned       not null,
+    valor        int                not null,
     tipo         char               not null,
     descricao    varchar(10)        not null,
     realizada_em datetime(6)        not null default now(6)
@@ -41,7 +41,7 @@ BEGIN
     where c.id = in_id_cliente
       and (c.saldo + @_valor) >= (c.limite * -1);
 
-    if @_saldo is not null then
+    if ROW_COUNT() != 0 then
         insert into rinha.transacao(valor, descricao, id_cliente, tipo)
         values (in_valor, in_descricao, in_id_cliente, in_tipo);
         set out_saldo = COMPRESS(JSON_COMPACT(JSON_OBJECT('saldo', @_saldo, 'limite', @_limite)));
