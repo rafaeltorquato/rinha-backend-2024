@@ -22,11 +22,11 @@ import static org.jboss.resteasy.reactive.RestResponse.Status.NOT_FOUND;
 @Startup
 @Path("/clientes")
 public class ClientesApi {
-    private static final RestResponse<byte[]> STATUS_422 = new RestResponseBuilderImpl<byte[]>()
+    private static final RestResponse<String> STATUS_422 = new RestResponseBuilderImpl<String>()
             .header("Content-Type", MediaType.APPLICATION_JSON)
             .status(422)
             .build();
-    private static final RestResponse<byte[]> STATUS_404 = new RestResponseBuilderImpl<byte[]>()
+    private static final RestResponse<String> STATUS_404 = new RestResponseBuilderImpl<String>()
             .header("Content-Type", MediaType.APPLICATION_JSON)
             .status(NOT_FOUND.getStatusCode())
             .build();
@@ -40,17 +40,17 @@ public class ClientesApi {
     @GET
     @Path(("/{id}/extrato"))
     @RunOnVirtualThread
-    public RestResponse<byte[]> getExtrato(@PathParam("id") final int id) {
+    public RestResponse<String> getExtrato(@PathParam("id") final int id) {
         final var resposta = this.extratos.buscar(id);
 
         return switch (resposta.status()) {
             case OK -> {
-                byte[] bytes = resposta.extratoCliente();
-                yield new RestResponseBuilderImpl<byte[]>()
+                final String json = resposta.extratoCliente();
+                final byte[] bytes = json.getBytes();
+                yield new RestResponseBuilderImpl<String>()
                         .header("Content-Type", MediaType.APPLICATION_JSON)
                         .header(HttpHeaders.CONTENT_LENGTH, bytes.length)
-                        .encoding("deflate")
-                        .entity(bytes)
+                        .entity(json)
                         .build();
             }
             case CLIENTE_INVALIDO -> STATUS_404;
@@ -60,18 +60,18 @@ public class ClientesApi {
     @POST
     @Path(("/{id}/transacoes"))
     @RunOnVirtualThread
-    public RestResponse<byte[]> postTransacao(@PathParam("id") final int id,
+    public RestResponse<String> postTransacao(@PathParam("id") final int id,
                                               final TransacaoPendente transacaoPendente) {
         final var solicitacao = new Transacoes.Solicitacao(id, transacaoPendente);
         final var resposta = this.transacoes.processar(solicitacao);
         return switch (resposta.status()) {
             case OK -> {
-                byte[] bytes = resposta.saldo();
-                yield new RestResponseBuilderImpl<byte[]>()
+                final String json = resposta.saldo();
+                final byte[] bytes = json.getBytes();
+                yield new RestResponseBuilderImpl<String>()
                         .header("Content-Type", MediaType.APPLICATION_JSON)
                         .header(HttpHeaders.CONTENT_LENGTH, bytes.length)
-                        .encoding("deflate")
-                        .entity(bytes)
+                        .entity(json)
                         .build();
             }
             case SEM_SALDO, TRANSACAO_INVALIDA -> STATUS_422;

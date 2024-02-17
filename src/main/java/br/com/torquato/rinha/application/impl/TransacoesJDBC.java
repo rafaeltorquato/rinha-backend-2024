@@ -13,8 +13,6 @@ import javax.sql.DataSource;
 import java.sql.Types;
 import java.util.Set;
 
-import static br.com.torquato.rinha.application.impl.ZlibUtil.removeBytes;
-
 @Startup
 @Slf4j
 @ApplicationScoped
@@ -43,9 +41,9 @@ public class TransacoesJDBC implements Transacoes {
             stmt.setString(4, transacaoPendente.tipo());
             stmt.registerOutParameter(5, Types.VARBINARY); //saldo
             stmt.execute();
-            final byte[] saldoZip = stmt.getBytes(5);
-            if (saldoZip != null) {
-                return new Resposta(removeBytes(saldoZip));
+            final String saldo = stmt.getString(5);
+            if (saldo != null) {
+                return new Resposta(saldo);
             }
             return SEM_SALDO;
         } catch (Exception e) {
