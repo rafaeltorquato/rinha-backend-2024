@@ -1,28 +1,25 @@
 services:
   database:
-    image: mariadb:latest
+    image: postgres:latest
     container_name: database
     mem_swappiness: 0
     security_opt:
       - seccomp:unconfined
     environment:
-      - 'MARIADB_ROOT_PASSWORD=root'
-      - 'MARIADB_DATABASE=rinha'
+      - 'POSTGRES_USER=postgres'
+      - 'POSTGRES_PASSWORD=postgres'
+      - 'POSTGRES_DB=rinha'
       - 'TZ=America/Sao_Paulo'
-      - 'MARIADB_ALLOW_EMPTY_ROOT_PASSWORD: true'
-      - 'MARIADB_MYSQL_LOCALHOST_USER: 1'
-      - 'MARIADB_MYSQL_LOCALHOST_GRANTS: USAGE'
     deploy:
       resources:
         limits:
           cpus: "0.65"
-          memory: "150MB"
+          memory: "250MB"
     volumes:
-      - ./sql/mysql-init-script.sql:/docker-entrypoint-initdb.d/mysql-init-script.sql
-      - ./mysql.conf:/etc/mysql/conf.d/config-file.cnf
+      - ./sql/postgres-init-script.sql:/docker-entrypoint-initdb.d/postgres-init-script.sql
     network_mode: host
     healthcheck:
-      test: [ "CMD", "healthcheck.sh", "--su-mysql", "--connect", "--innodb_initialized" ]
+      test: ["CMD-SHELL", "sh -c 'pg_isready -U postgres -d rinha'"]
       interval: 5s
       timeout: 5s
       retries: 10
@@ -34,7 +31,7 @@ services:
         soft: -1
         hard: -1
     ports:
-      - 3306:3306
+      - 5432:5432
 
   app1: &api
     container_name: app1
@@ -47,16 +44,16 @@ services:
       - 'QUARKUS_DATASOURCE_JDBC_MAX_SIZE=7'
       - 'QUARKUS_DATASOURCE_JDBC_DETECT_STATEMENT_LEAKS=false'
       - 'QUARKUS_DATASOURCE_JDBC_ACQUISITION_TIMEOUT=10S'
-      - 'QUARKUS_DATASOURCE_JDBC_URL=jdbc:mariadb://127.0.0.1:3306/rinha?cachePrepStmts=true&useServerPrepStmts=false&prepStmtCacheSize=500&prepStmtCacheSqlLimit=1024'
-      - 'QUARKUS_DATASOURCE_USERNAME=root'
-      - 'QUARKUS_DATASOURCE_PASSWORD=root'
+      - 'QUARKUS_DATASOURCE_JDBC_URL=jdbc:postgresql://localhost:5432/rinha'
+      - 'QUARKUS_DATASOURCE_USERNAME=postgres'
+      - 'QUARKUS_DATASOURCE_PASSWORD=postgres'
       - 'TZ=America/Sao_Paulo'
       - 'QUARKUS_HTTP_PORT=8080'
     deploy:
       resources:
         limits:
           cpus: "0.35"
-          memory: "170MB"
+          memory: "120MB"
     depends_on:
       database:
         condition: service_healthy
@@ -77,9 +74,9 @@ services:
       - 'QUARKUS_DATASOURCE_JDBC_MAX_SIZE=7'
       - 'QUARKUS_DATASOURCE_JDBC_DETECT_STATEMENT_LEAKS=false'
       - 'QUARKUS_DATASOURCE_JDBC_ACQUISITION_TIMEOUT=10S'
-      - 'QUARKUS_DATASOURCE_JDBC_URL=jdbc:mariadb://127.0.0.1:3306/rinha?cachePrepStmts=true&useServerPrepStmts=false&prepStmtCacheSize=500&prepStmtCacheSqlLimit=1024'
-      - 'QUARKUS_DATASOURCE_USERNAME=root'
-      - 'QUARKUS_DATASOURCE_PASSWORD=root'
+      - 'QUARKUS_DATASOURCE_JDBC_URL=jdbc:postgresql://localhost:5432/rinha'
+      - 'QUARKUS_DATASOURCE_USERNAME=postgres'
+      - 'QUARKUS_DATASOURCE_PASSWORD=postgres'
       - 'TZ=America/Sao_Paulo'
       - 'QUARKUS_HTTP_PORT=8081'
 

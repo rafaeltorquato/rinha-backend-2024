@@ -2,15 +2,15 @@ quarkus:
   log:
     level: WARN
   http:
-    port: 8080
+    port: 9999
     tcp-quick-ack: true
     tcp-cork: true
     tcp-fast-open: true
   datasource:
-    db-kind: mariadb
-    username: root
-    password: root
+    db-kind: postgresql
+    username: postgres
+    password: postgres
     jdbc:
-      url: "jdbc:mariadb://localhost:3306/rinha"
+      url: "jdbc:postgresql://localhost:5432/rinha"
       max-size: 10
-      transactions: disabled
+      transaction-isolation-level: read-committed
