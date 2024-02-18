@@ -5,6 +5,7 @@ import br.com.torquato.rinha.domain.model.TransacaoPendente;
 import io.quarkus.runtime.Startup;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.postgresql.util.PGobject;
 
@@ -24,6 +25,7 @@ public class TransacoesJDBC implements Transacoes {
     Set<Integer> cacheClientes;
 
     @Override
+    @Transactional
     public Resposta processar(final Solicitacao solicitacao) {
         if (!this.cacheClientes.contains(solicitacao.idCliente())) {
             return CLIENTE_INVALIDO;
@@ -49,12 +51,5 @@ public class TransacoesJDBC implements Transacoes {
             throw new RuntimeException(e);
         }
     }
-//
-//    void onStart(@Observes final StartupEvent evt) {
-//        this.processar(new Solicitacao(
-//                this.cacheClientes.stream().findFirst().get(),
-//                new TransacaoPendente(Integer.MAX_VALUE, "d", "abc"))
-//        );
-//        log.warn("Transacao warm up!");
-//    }
+
 }

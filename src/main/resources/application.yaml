@@ -13,4 +13,4 @@ quarkus:
     jdbc:
       url: "jdbc:postgresql://localhost:5432/rinha"
       max-size: 10
-      transaction: disabled
+      transactions: disabled

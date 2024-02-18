@@ -91,7 +91,7 @@ BEGIN
           order by t.realizada_em desc
           limit 10) x;
 
-    if (_transacoes_json is null) then
+    if _transacoes_json is null then
         _transacoes_json := json_build_array();
     end if;
     out_extrato := json_build_object('saldo', _saldo_json,

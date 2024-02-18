@@ -33,14 +33,10 @@ public class ExtratosJDBC implements Extratos {
             stmt.setInt(1, idCliente);
             stmt.registerOutParameter(2, Types.OTHER);
             stmt.execute();
-            return new Resposta(((PGobject)stmt.getObject(2)).getValue());
+            return new Resposta(((PGobject) stmt.getObject(2)).getValue());
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
-//    void onStart(@Observes final StartupEvent evt) {
-//        this.buscar(this.cacheClientes.stream().findFirst().get());
-//        log.warn("Extrato warm up!");
-//    }
 }
