@@ -14,9 +14,10 @@ services:
       resources:
         limits:
           cpus: "0.65"
-          memory: "250MB"
+          memory: "150MB"
     volumes:
       - ./sql/postgres-init-script.sql:/docker-entrypoint-initdb.d/postgres-init-script.sql
+      - ./postgresql.conf:/etc/postgresql/postgresql.conf:ro
     network_mode: host
     healthcheck:
       test: ["CMD-SHELL", "sh -c 'pg_isready -U postgres -d rinha'"]
@@ -35,7 +36,7 @@ services:
 
   app1: &api
     container_name: app1
-    image: quarkus/rinha-backend-2024
+    image: quarkus/rinha-backend-2024-psql
     environment:
       - 'QUARKUS_LOG_LEVEL=WARN'
       - 'QUARKUS_LOG_FILE_ENABLE=false'
@@ -53,7 +54,7 @@ services:
       resources:
         limits:
           cpus: "0.35"
-          memory: "120MB"
+          memory: "170MB"
     depends_on:
       database:
         condition: service_healthy

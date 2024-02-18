@@ -5,14 +5,14 @@
 drop schema if exists rinha CASCADE;
 create schema rinha;
 
-create table rinha.cliente
+create unlogged table rinha.cliente
 (
     id     smallint primary key,
     limite int not null,
     saldo  int not null
 );
 
-create table rinha.transacao
+create unlogged table rinha.transacao
 (
     id_cliente   smallint           not null,
     valor        int                not null,

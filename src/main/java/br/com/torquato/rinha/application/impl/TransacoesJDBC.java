@@ -5,7 +5,6 @@ import br.com.torquato.rinha.domain.model.TransacaoPendente;
 import io.quarkus.runtime.Startup;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.postgresql.util.PGobject;
 
@@ -25,7 +24,6 @@ public class TransacoesJDBC implements Transacoes {
     Set<Integer> cacheClientes;
 
     @Override
-    @Transactional(Transactional.TxType.REQUIRES_NEW)
     public Resposta processar(final Solicitacao solicitacao) {
         if (!this.cacheClientes.contains(solicitacao.idCliente())) {
             return CLIENTE_INVALIDO;

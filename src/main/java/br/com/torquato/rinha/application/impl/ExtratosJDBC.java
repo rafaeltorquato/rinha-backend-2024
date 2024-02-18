@@ -4,7 +4,6 @@ import br.com.torquato.rinha.application.Extratos;
 import io.quarkus.runtime.Startup;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.postgresql.util.PGobject;
 
@@ -24,7 +23,6 @@ public class ExtratosJDBC implements Extratos {
     Set<Integer> cacheClientes;
 
     @Override
-    @Transactional(Transactional.TxType.REQUIRES_NEW)
     public Resposta buscar(final int idCliente) {
         if (!this.cacheClientes.contains(idCliente)) {
             return CLIENTE_INVALIDO;
