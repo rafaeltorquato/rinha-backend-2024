@@ -5,6 +5,8 @@
 drop schema if exists rinha CASCADE;
 create schema rinha;
 
+-- Ao usar unlogged table, a tabela fica vulnerável a um crash no banco e os dados serem perdidos.
+-- Use com cautela.
 create unlogged table rinha.cliente
 (
     id     smallint primary key,
@@ -12,30 +14,32 @@ create unlogged table rinha.cliente
     saldo  int not null
 );
 
+-- Ao usar unlogged table, a tabela fica vulnerável a um crash no banco e os dados serem perdidos.
+-- Use com cautela.
 create unlogged table rinha.transacao
 (
-    id_cliente   smallint           not null,
-    valor        int                not null,
-    tipo         char               not null,
-    descricao    varchar(10)        not null,
-    realizada_em timestamp(6)       not null default current_timestamp(6)
+    id_cliente   smallint     not null,
+    valor        int          not null,
+    tipo         char         not null,
+    descricao    varchar(10)  not null,
+    realizada_em timestamp(6) not null default current_timestamp(6)
 );
 
 create index idx_id_clienterealizada_em
     on rinha.transacao (id_cliente, realizada_em desc);
 
-drop PROCEDURE if exists rinha.processa_transacao;
+drop procedure if exists rinha.processa_transacao;
 
-CREATE PROCEDURE rinha.processa_transacao(IN in_id_cliente int,
-                                          IN in_valor int,
-                                          IN in_descricao varchar(10),
-                                          IN in_tipo char,
-                                          OUT out_saldo json)
-AS
+create procedure rinha.processa_transacao(in in_id_cliente int,
+                                          in in_valor int,
+                                          in in_descricao varchar(10),
+                                          in in_tipo char,
+                                          out out_saldo json)
+as
 $$
-DECLARE
+declare
     _valor int;
-BEGIN
+begin
     if in_tipo = 'd' then
         _valor := in_valor * -1;
     else
@@ -56,18 +60,19 @@ BEGIN
         insert into rinha.transacao(valor, descricao, id_cliente, tipo)
         values (in_valor, in_descricao, in_id_cliente, in_tipo);
     end if;
-END;
-$$ LANGUAGE plpgsql;
+end ;
+$$ language plpgsql;
 
 drop procedure if exists rinha.retorna_extrato;
-create procedure rinha.retorna_extrato(IN in_id_cliente int, OUT out_extrato json)
-AS
+create procedure rinha.retorna_extrato(in in_id_cliente int,
+                                       out out_extrato json)
+as
 $$
-DECLARE
+declare
     _saldo_json      json;
     _transacoes_json json;
     _data_extrato    timestamp(6);
-BEGIN
+begin
     _data_extrato := current_timestamp(6);
     select json_build_object('total', c.saldo, 'limite', c.limite, 'data_extrato',
                              to_char(_data_extrato, 'yyyy-mm-dd"T"HH24:MI:SS.MS'))
@@ -96,9 +101,9 @@ BEGIN
     end if;
     out_extrato := json_build_object('saldo', _saldo_json,
                                      'ultimas_transacoes', _transacoes_json);
-END;
+end;
 
-$$ LANGUAGE plpgsql;
+$$ language plpgsql;
 
 insert into rinha.cliente (id, limite, saldo)
 values (1, 100000, 0),
