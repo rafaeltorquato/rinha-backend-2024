@@ -6,6 +6,8 @@ quarkus:
     tcp-quick-ack: true
     tcp-cork: true
     tcp-fast-open: true
+    http2: false
+    http2-push-enabled: false
   datasource:
     db-kind: postgresql
     username: postgres

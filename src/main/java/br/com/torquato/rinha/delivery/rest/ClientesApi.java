@@ -46,10 +46,9 @@ public class ClientesApi {
         return switch (resposta.status()) {
             case OK -> {
                 final String json = resposta.extratoCliente();
-                final byte[] bytes = json.getBytes();
                 yield new RestResponseBuilderImpl<String>()
                         .header("Content-Type", MediaType.APPLICATION_JSON)
-                        .header(HttpHeaders.CONTENT_LENGTH, bytes.length)
+                        .header(HttpHeaders.CONTENT_LENGTH, json.getBytes().length)
                         .entity(json)
                         .build();
             }
@@ -67,10 +66,9 @@ public class ClientesApi {
         return switch (resposta.status()) {
             case OK -> {
                 final String json = resposta.saldo();
-                final byte[] bytes = json.getBytes();
                 yield new RestResponseBuilderImpl<String>()
                         .header("Content-Type", MediaType.APPLICATION_JSON)
-                        .header(HttpHeaders.CONTENT_LENGTH, bytes.length)
+                        .header(HttpHeaders.CONTENT_LENGTH, json.getBytes().length)
                         .entity(json)
                         .build();
             }

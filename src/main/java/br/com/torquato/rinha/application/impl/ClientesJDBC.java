@@ -1,8 +1,9 @@
 package br.com.torquato.rinha.application.impl;
 
+import br.com.torquato.rinha.application.Clientes;
 import io.quarkus.runtime.Startup;
+import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.enterprise.inject.Produces;
 import jakarta.inject.Inject;
 
 import javax.sql.DataSource;
@@ -15,25 +16,29 @@ import java.util.Set;
  */
 @Startup
 @ApplicationScoped
-public class CacheProducerJDBC {
+public class ClientesJDBC implements Clientes {
 
     @Inject
     DataSource dataSource;
+    Set<Integer> idsClientes;
 
-    @Produces
-    @ApplicationScoped
-    public Set<Integer> clientesCache() {
+    @PostConstruct
+    void carregarClientes() {
         try (final var connection = this.dataSource.getConnection();
              final var preparedStatement = connection.prepareStatement("select id from rinha.cliente");
              final var resultSet = preparedStatement.executeQuery()) {
 
-            final HashSet<Integer> set = new HashSet<>(resultSet.getFetchSize());
+            this.idsClientes = new HashSet<>(resultSet.getFetchSize());
             while (resultSet.next()) {
-                set.add(resultSet.getInt(1));
+                this.idsClientes.add(resultSet.getInt(1));
             }
-            return set;
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @Override
+    public boolean existe(int idCliente) {
+        return this.idsClientes.contains(idCliente);
     }
 }

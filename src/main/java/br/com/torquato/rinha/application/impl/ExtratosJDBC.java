@@ -1,15 +1,14 @@
 package br.com.torquato.rinha.application.impl;
 
+import br.com.torquato.rinha.application.Clientes;
 import br.com.torquato.rinha.application.Extratos;
 import io.quarkus.runtime.Startup;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
-import org.postgresql.util.PGobject;
 
 import javax.sql.DataSource;
 import java.sql.Types;
-import java.util.Set;
 
 @Slf4j
 @Startup
@@ -20,23 +19,22 @@ public class ExtratosJDBC implements Extratos {
     DataSource dataSource;
 
     @Inject
-    Set<Integer> cacheClientes;
+    Clientes clientes;
 
     @Override
     public Resposta buscar(final int idCliente) {
-        if (!this.cacheClientes.contains(idCliente)) {
+        if (!this.clientes.existe(idCliente)) {
             return CLIENTE_INVALIDO;
         }
 
         try (final var connection = this.dataSource.getConnection();
-             final var stmt = connection.prepareCall("call rinha.retorna_extrato(?,?)")) {
+             final var stmt = connection.prepareCall("{call rinha.retorna_extrato(?,?)}")) {
             stmt.setInt(1, idCliente);
-            stmt.registerOutParameter(2, Types.OTHER);
+            stmt.registerOutParameter(2, Types.VARBINARY);
             stmt.execute();
-            return new Resposta(((PGobject) stmt.getObject(2)).getValue());
+            return new Resposta(stmt.getString(2));
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
-
 }
