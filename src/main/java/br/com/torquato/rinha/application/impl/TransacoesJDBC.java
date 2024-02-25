@@ -7,6 +7,7 @@ import io.quarkus.runtime.Startup;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
+import org.postgresql.util.PGobject;
 
 import javax.sql.DataSource;
 import java.sql.Types;
@@ -32,16 +33,16 @@ public class TransacoesJDBC implements Transacoes {
             return TRANSACAO_INVALIDA;
         }
         try (final var connection = this.dataSource.getConnection();
-             final var stmt = connection.prepareCall("{call rinha.processa_transacao(?,?,?,?,?)}")) {
+             final var stmt = connection.prepareCall("call rinha.processa_transacao(?,?,?,?,?)")) {
             stmt.setInt(1, solicitacao.idCliente());
             stmt.setInt(2, (int) transacaoPendente.valor());
             stmt.setString(3, transacaoPendente.descricao());
             stmt.setString(4, transacaoPendente.tipo());
-            stmt.registerOutParameter(5, Types.VARBINARY);
+            stmt.registerOutParameter(5, Types.OTHER);
             stmt.execute();
-            final String saldo = stmt.getString(5);
+            final PGobject saldo = (PGobject) stmt.getObject(5);
             if (saldo != null) {
-                return new Resposta(saldo);
+                return new Resposta(saldo.getValue());
             }
             return SEM_SALDO;
         } catch (Exception e) {

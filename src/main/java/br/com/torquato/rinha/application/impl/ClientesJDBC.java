@@ -24,6 +24,21 @@ public class ClientesJDBC implements Clientes {
 
     @PostConstruct
     void carregarClientes() {
+        psqlPreWarm();
+        carregar();
+    }
+
+    private void psqlPreWarm() {
+        try (final var connection = this.dataSource.getConnection();
+             final var preparedStatement = connection.prepareStatement("select pg_prewarm('rinha.cliente')");
+             final var resultSet = preparedStatement.executeQuery()) {
+            resultSet.next();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private void carregar() {
         try (final var connection = this.dataSource.getConnection();
              final var preparedStatement = connection.prepareStatement("select id from rinha.cliente");
              final var resultSet = preparedStatement.executeQuery()) {
@@ -36,6 +51,8 @@ public class ClientesJDBC implements Clientes {
             throw new RuntimeException(e);
         }
     }
+
+
 
     @Override
     public boolean existe(int idCliente) {
