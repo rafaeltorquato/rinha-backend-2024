@@ -1,16 +1,14 @@
 package br.com.torquato.rinha.application.impl;
 
+import br.com.torquato.rinha.application.Clientes;
 import br.com.torquato.rinha.application.Extratos;
 import io.quarkus.runtime.Startup;
-import io.quarkus.runtime.StartupEvent;
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.enterprise.event.Observes;
 import jakarta.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.sql.DataSource;
 import java.sql.Types;
-import java.util.Set;
 
 @Slf4j
 @Startup
@@ -21,11 +19,11 @@ public class ExtratosJDBC implements Extratos {
     DataSource dataSource;
 
     @Inject
-    Set<Integer> cacheClientes;
+    Clientes clientes;
 
     @Override
     public Resposta buscar(final int idCliente) {
-        if (!this.cacheClientes.contains(idCliente)) {
+        if (!this.clientes.existe(idCliente)) {
             return CLIENTE_INVALIDO;
         }
 
@@ -38,10 +36,5 @@ public class ExtratosJDBC implements Extratos {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-    }
-
-    void onStart(@Observes final StartupEvent evt) {
-        this.buscar(this.cacheClientes.stream().findFirst().get());
-        log.warn("Extrato warm up!");
     }
 }

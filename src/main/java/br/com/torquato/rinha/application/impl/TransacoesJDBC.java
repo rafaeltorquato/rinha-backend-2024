@@ -1,17 +1,15 @@
 package br.com.torquato.rinha.application.impl;
 
+import br.com.torquato.rinha.application.Clientes;
 import br.com.torquato.rinha.application.Transacoes;
 import br.com.torquato.rinha.domain.model.TransacaoPendente;
 import io.quarkus.runtime.Startup;
-import io.quarkus.runtime.StartupEvent;
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.enterprise.event.Observes;
 import jakarta.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.sql.DataSource;
 import java.sql.Types;
-import java.util.Set;
 
 @Startup
 @Slf4j
@@ -22,11 +20,11 @@ public class TransacoesJDBC implements Transacoes {
     DataSource dataSource;
 
     @Inject
-    Set<Integer> cacheClientes;
+    Clientes clientes;
 
     @Override
     public Resposta processar(final Solicitacao solicitacao) {
-        if (!this.cacheClientes.contains(solicitacao.idCliente())) {
+        if (!this.clientes.existe(solicitacao.idCliente())) {
             return CLIENTE_INVALIDO;
         }
         final TransacaoPendente transacaoPendente = solicitacao.transacaoPendente();
@@ -39,7 +37,7 @@ public class TransacoesJDBC implements Transacoes {
             stmt.setInt(2, (int) transacaoPendente.valor());
             stmt.setString(3, transacaoPendente.descricao());
             stmt.setString(4, transacaoPendente.tipo());
-            stmt.registerOutParameter(5, Types.VARBINARY); //saldo
+            stmt.registerOutParameter(5, Types.VARBINARY);
             stmt.execute();
             final String saldo = stmt.getString(5);
             if (saldo != null) {
@@ -49,13 +47,5 @@ public class TransacoesJDBC implements Transacoes {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-    }
-
-    void onStart(@Observes final StartupEvent evt) {
-        this.processar(new Solicitacao(
-                this.cacheClientes.stream().findFirst().get(),
-                new TransacaoPendente(Integer.MAX_VALUE, "d", "abc"))
-        );
-        log.warn("Transacao warm up!");
     }
 }
