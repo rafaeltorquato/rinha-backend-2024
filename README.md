@@ -8,23 +8,20 @@ Projeto Java para a [Rinha de Backend 2024 Q1](https://github.com/zanfranceschi/
 **Saitama Version** - Versão que prioriza velocidade.
 
 ## Antes de começar
-Dada as premissas da rinha, algumas decisões foram tomadas para deixar o projeto mais performático possível. 
+Dada as premissas da rinha, algumas decisões foram tomadas para deixar o projeto mais performático possível.
 Certas decisões não seriam tomadas em um projeto real, principalmente em projetos que tratam transações financeiras.
 
 ## Stack
 
-* Java 21.0.2 Native image GraalVM;
+* Java v21.0.2 Native image GraalVM;
   * Virtual Threads;
-* Framework Quarkus (latest);
-* PostgreSQL (latest);
+* Framework Quarkus v3.7.1;
+* PostgreSQL v16;
   * Stored Procedures;
+* HAProxy v2.9;
 * JDBC;
 
 ## Executando o projeto
-Build (caso queira alterar algo e recompilar):
-```shell script
-./mvnw clean package -Pnative && docker build -f src/main/docker/Dockerfile.native-micro --platform linux/amd64 -t rafaeltorquato/rinha-backend-2024-q1-saitama .
-```
 Run:
 ```shell script
 docker compose up
