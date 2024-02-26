@@ -1,6 +1,6 @@
 services:
   database:
-    image: postgres:latest
+    image: postgres:16
     container_name: database
     mem_swappiness: 0
     security_opt:
@@ -83,7 +83,7 @@ services:
 
   haproxy:
     container_name: haproxy
-    image: haproxy:latest
+    image: haproxy:2.9
     volumes:
       - ./haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
     environment:

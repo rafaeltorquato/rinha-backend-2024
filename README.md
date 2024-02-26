@@ -1,5 +1,5 @@
 # rinha-backend-2024 Q1 (Saitama Version)
-![death-punch.png](death-punch.png)
+![death-punch.png](img/death-punch.png)
 
 Projeto Java para a [Rinha de Backend 2024 Q1](https://github.com/zanfranceschi/rinha-de-backend-2024-q1).
 
@@ -29,7 +29,7 @@ docker compose up
 
 ## Resultado
 A imagem abaixo contém o resultado da execução do gatling (25/02/2024) em um Ryzen 9 5900X 12 cores 24 threads, 64GB RAM DDR4 3600, NVME Gen 3.
-![execucao.png](execucao.png)
+![execucao.png](img/execucao.png)
 
 
 ## Contato
