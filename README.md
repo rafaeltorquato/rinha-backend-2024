@@ -3,7 +3,7 @@
 
 Projeto Java para a [Rinha de Backend 2024 Q1](https://github.com/zanfranceschi/rinha-de-backend-2024-q1).
 
-[Repositório](https://github.com/rafaeltorquato/rinha-backend-2024/tree/saitama) com os fontes **branch death-fast**.
+[Repositório](https://github.com/rafaeltorquato/rinha-backend-2024/tree/saitama) com os fontes **branch saitama**.
 
 **Saitama Version** - Versão que prioriza velocidade.
 
