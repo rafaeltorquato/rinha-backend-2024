@@ -36,7 +36,7 @@ services:
 
   app1: &api
     container_name: app1
-    image: rafaeltorquato/rinha-backend-2024-q1-fast:latest
+    image: rafaeltorquato/rinha-backend-2024-q1-saitama:latest
     environment:
       - 'QUARKUS_LOG_LEVEL=WARN'
       - 'QUARKUS_LOG_FILE_ENABLE=false'

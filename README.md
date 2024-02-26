@@ -1,11 +1,11 @@
-# rinha-backend-2024 (Death Fast Version)
+# rinha-backend-2024 (Saitama Version)
 ![death-punch.png](death-punch.png)
 
 Projeto Java para a [Rinha de Backend 2024 Q1](https://github.com/zanfranceschi/rinha-de-backend-2024-q1).
 
-[Repositório](https://github.com/rafaeltorquato/rinha-backend-2024) com os fontes **branch death-fast**.
+[Repositório](https://github.com/rafaeltorquato/rinha-backend-2024/tree/saitama) com os fontes **branch death-fast**.
 
-**Death Fast Version** - Versão que prioriza velocidade em desfavor da durabilidade dos dados.
+**Saitama Version** - Versão que prioriza velocidade.
 
 ## Antes de começar
 Dada as premissas da rinha, algumas decisões foram tomadas para deixar o projeto mais performático possível. 
@@ -21,14 +21,11 @@ Certas decisões não seriam tomadas em um projeto real, principalmente em proje
 * JDBC;
 
 ## Executando o projeto
-Build:
+Build (caso queira alterar algo e recompilar):
 ```shell script
-./mvnw clean package -Pnative && docker build -f src/main/docker/Dockerfile.native-micro --platform linux/amd64 -t rafaeltorquato/rinha-backend-2024-q1-fast .
+./mvnw clean package -Pnative && docker build -f src/main/docker/Dockerfile.native-micro --platform linux/amd64 -t rafaeltorquato/rinha-backend-2024-q1-saitama .
 ```
 Run:
 ```shell script
 docker compose up
 ```
-
-
-[Related guide section...](https://quarkus.io/guides/getting-started-reactive#reactive-jax-rs-resources)
