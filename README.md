@@ -29,3 +29,7 @@ Run:
 ```shell script
 docker compose up
 ```
+
+## Resultado
+A imagem abaixo contém o resultado da execução do gatling (25/02/2024) em um Ryzen 9 5900X 12 cores 24 threads, 64GB RAM DDR4 3600, NVME Gen 3.
+![execucao.png](execucao.png)
