@@ -22,7 +22,7 @@ public class ExtratosJDBC implements Extratos {
     Clientes clientes;
 
     @Override
-    public Resposta buscar(final int idCliente) {
+    public Resposta buscar(final short idCliente) {
         if (!this.clientes.existe(idCliente)) {
             return CLIENTE_INVALIDO;
         }
@@ -30,7 +30,7 @@ public class ExtratosJDBC implements Extratos {
         try (final var connection = this.dataSource.getConnection();
              final var stmt = connection.prepareCall("{call rinha.retorna_extrato(?,?)}")) {
             stmt.setInt(1, idCliente);
-            stmt.registerOutParameter(2, Types.VARBINARY);
+            stmt.registerOutParameter(2, Types.VARCHAR);
             stmt.execute();
             return new Resposta(stmt.getString(2));
         } catch (Exception e) {

@@ -40,7 +40,7 @@ public class ClientesApi {
     @GET
     @Path(("/{id}/extrato"))
     @RunOnVirtualThread
-    public RestResponse<String> getExtrato(@PathParam("id") final int id) {
+    public RestResponse<String> getExtrato(@PathParam("id") final short id) {
         final var resposta = this.extratos.buscar(id);
 
         return switch (resposta.status()) {
@@ -59,7 +59,7 @@ public class ClientesApi {
     @POST
     @Path(("/{id}/transacoes"))
     @RunOnVirtualThread
-    public RestResponse<String> postTransacao(@PathParam("id") final int id,
+    public RestResponse<String> postTransacao(@PathParam("id") final short id,
                                               final TransacaoPendente transacaoPendente) {
         final var solicitacao = new Transacoes.Solicitacao(id, transacaoPendente);
         final var resposta = this.transacoes.processar(solicitacao);

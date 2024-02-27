@@ -5,7 +5,7 @@ public interface Extratos {
     Extratos.Resposta CLIENTE_INVALIDO = new Extratos.Resposta(Status.CLIENTE_INVALIDO);
 
 
-    Resposta buscar(final int idCliente);
+    Resposta buscar(final short idCliente);
 
     record Resposta(Status status, String extratoCliente) {
         public Resposta(Status status) {

@@ -12,7 +12,6 @@ create table rinha.cliente
 
 create table rinha.transacao
 (
-    id           serial primary key not null,
     id_cliente   smallint unsigned  not null,
     valor        int                not null,
     tipo         char               not null,
@@ -20,13 +19,13 @@ create table rinha.transacao
     realizada_em datetime(6)        not null default now(6)
 ) ENGINE = INNODB;
 
-create index idx_id_clienterealizada_em
+create index i_ic_re
     on rinha.transacao (id_cliente, realizada_em desc);
 
 drop procedure if exists rinha.processa_transacao;
 DELIMITER |
 create procedure rinha.processa_transacao(
-    IN in_id_cliente int,
+    IN in_id_cliente smallint,
     IN in_valor int,
     IN in_descricao varchar(10),
     IN in_tipo char,
@@ -86,20 +85,21 @@ BEGIN
           order by t.realizada_em desc
           limit 10) x;
 
-    if (transacoes_json is null) then
+    if transacoes_json is null then
         set transacoes_json = JSON_ARRAY();
     end if;
-    set out_extrato = JSON_OBJECT('saldo', JSON_LOOSE(saldo_json), 'ultimas_transacoes', JSON_LOOSE(transacoes_json));
+    set out_extrato = JSON_OBJECT('saldo', JSON_LOOSE(saldo_json), 'ultimas_transacoes',
+                                  JSON_LOOSE(transacoes_json));
     COMMIT;
 END |
 delimiter ;
-
+START TRANSACTION;
 insert into rinha.cliente (id, limite, saldo)
 values (1, 100000, 0),
        (2, 80000, 0),
        (3, 1000000, 0),
        (4, 10000000, 0),
        (5, 500000, 0);
-
+COMMIT;
 
 # Cache

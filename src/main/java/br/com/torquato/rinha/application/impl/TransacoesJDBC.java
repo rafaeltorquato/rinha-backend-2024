@@ -33,11 +33,11 @@ public class TransacoesJDBC implements Transacoes {
         }
         try (final var connection = this.dataSource.getConnection();
              final var stmt = connection.prepareCall("{call rinha.processa_transacao(?,?,?,?,?)}")) {
-            stmt.setInt(1, solicitacao.idCliente());
+            stmt.setShort(1, solicitacao.idCliente());
             stmt.setInt(2, (int) transacaoPendente.valor());
             stmt.setString(3, transacaoPendente.descricao());
             stmt.setString(4, transacaoPendente.tipo());
-            stmt.registerOutParameter(5, Types.VARBINARY);
+            stmt.registerOutParameter(5, Types.VARCHAR);
             stmt.execute();
             final String saldo = stmt.getString(5);
             if (saldo != null) {

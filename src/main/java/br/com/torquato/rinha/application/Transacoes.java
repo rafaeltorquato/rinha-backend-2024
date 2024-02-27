@@ -21,7 +21,7 @@ public interface Transacoes {
         }
     }
 
-    record Solicitacao(int idCliente, TransacaoPendente transacaoPendente) {
+    record Solicitacao(short idCliente, TransacaoPendente transacaoPendente) {
     }
 
 
